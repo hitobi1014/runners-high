@@ -27,7 +27,7 @@ class JwtTokenProvider(
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString))
     }
 
-    fun generateToken(userId: Long, nickname: String): String {
+    fun generateToken(userId: Int, nickname: String): String {
         val claims = Jwts.claims().setSubject(userId.toString())
         claims["nickname"] = nickname
 
@@ -42,9 +42,9 @@ class JwtTokenProvider(
             .compact()
     }
 
-    fun getUserId(token: String): Long {
+    fun getUserId(token: String): Int {
         val claims = getClaims(token)
-        return claims.subject.toLong()
+        return claims.subject.toInt()
     }
 
     fun getNickname(token: String): String {
