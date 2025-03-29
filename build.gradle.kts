@@ -29,6 +29,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-test")
+
+    // JWT 라이브러리 (jjwt - Java JWT)
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")          // JWT API
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")         // JWT 구현체
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")      // Jackson 지원 (JSON 처리용)
+
     // DB
     runtimeOnly("org.postgresql:postgresql")
 
