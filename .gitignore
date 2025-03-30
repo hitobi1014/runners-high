@@ -294,3 +294,6 @@ beautyJson.json
 # application yml
 application*.yml
 application-*.yml
+
+# 테스트 리소스들 제외
+test/resources/**

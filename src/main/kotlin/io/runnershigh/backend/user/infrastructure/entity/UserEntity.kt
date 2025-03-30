@@ -12,7 +12,7 @@ import org.hibernate.annotations.Comment
 class UserEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int,
+    val id: Int = 0,
 
     @Column(unique = true, length = 30, nullable = false)
     @Comment("로그인 ID")

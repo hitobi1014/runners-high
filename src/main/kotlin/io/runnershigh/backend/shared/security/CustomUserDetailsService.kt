@@ -1,7 +1,7 @@
 package io.runnershigh.backend.shared.security
 
 import io.runnershigh.backend.user.domain.enum.UserStatus
-import io.runnershigh.backend.user.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails

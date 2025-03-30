@@ -7,7 +7,7 @@ import io.mockk.verify
 import io.runnershigh.backend.user.domain.enum.AgeGroup
 import io.runnershigh.backend.user.domain.enum.Gender
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

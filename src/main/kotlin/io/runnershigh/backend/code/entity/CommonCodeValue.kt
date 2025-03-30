@@ -1,4 +1,4 @@
-package io.runnershigh.backend.shared.entity.code
+package io.runnershigh.backend.code.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
