@@ -1,4 +1,4 @@
-package io.runnershigh.backend.user.repository.query
+package io.runnershigh.backend.user.infrastructure.repository.query
 
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository

@@ -1,7 +1,7 @@
 package io.runnershigh.backend.user.util
 
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
