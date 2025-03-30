@@ -1,4 +1,4 @@
-package io.runnershigh.backend.shared.entity.code
+package io.runnershigh.backend.code.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
 import jakarta.persistence.*
@@ -19,7 +19,7 @@ import org.hibernate.annotations.Comment
 class CodeDetails(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Int,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
