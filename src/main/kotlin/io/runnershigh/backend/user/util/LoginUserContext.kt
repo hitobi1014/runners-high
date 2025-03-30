@@ -18,6 +18,5 @@ class LoginUserContext(
         val userId = getCurrentContextUserId()
         return userQueryRepository.findById(userId)
             .orElseThrow { IllegalStateException("User not found") } // TODO 예외 변경하기
-            ?: throw IllegalStateException("User not found")
     }
 }

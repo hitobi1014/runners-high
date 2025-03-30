@@ -52,9 +52,10 @@ class CodeRepositoryTest {
     @DisplayName("코드 조회 - 코드")
     fun getCodeGroupByCode() {
         //when
-        val foundCodeGroup = codeGroupRepository.findByCode("SYSTEM")!!
+        val foundCodeGroup = codeGroupRepository.findByCode("SYSTEM")
 
         //then
+        assertNotNull(foundCodeGroup, "Code group with code 'SYSTEM' should exist")
         assertTrue(foundCodeGroup.codeValue.isActive)
         assertEquals("SYSTEM", foundCodeGroup.codeValue.code)
         assertEquals("시스템코드", foundCodeGroup.codeValue.name)
@@ -64,9 +65,10 @@ class CodeRepositoryTest {
     @DisplayName("코드 조회 - 코드명")
     fun getCodeGroupByName() {
         //when
-        val foundCodeGroup = codeGroupRepository.findByName("시스템코드")!!
+        val foundCodeGroup = codeGroupRepository.findByName("시스템코드")
 
         //then
+        assertNotNull(foundCodeGroup, "Code group with name '시스템코드' should exist")
         assertTrue(foundCodeGroup.codeValue.isActive)
         assertEquals("SYSTEM", foundCodeGroup.codeValue.code)
         assertEquals("시스템코드", foundCodeGroup.codeValue.name)
