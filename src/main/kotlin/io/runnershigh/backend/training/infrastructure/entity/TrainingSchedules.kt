@@ -33,7 +33,7 @@ class TrainingSchedules(
     @Lob
     var description: String,
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Comment("훈련일정 상태")
     var status: TrainingStatus,
 

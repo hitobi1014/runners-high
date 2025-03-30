@@ -26,7 +26,7 @@ class UserEntity(
     @Comment("닉네임")
     var nickname: String,
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Comment("성별")
     var gender: Gender,
 
@@ -39,7 +39,7 @@ class UserEntity(
     @Embedded
     val runningStats: RunningStats = RunningStats(),
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Comment("회원 상태")
     @Column(nullable = false)
     var userStatus: UserStatus = UserStatus.ACTIVE,
