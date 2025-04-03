@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class SaveTrainingSchedule(
     val title: String,
     val location: String = "",
-    val scheduleDate: LocalDate,
+    val scheduledDate: LocalDate,
     val description: String = "",
     val status: TrainingStatus = TrainingStatus.PLANNED,
 )

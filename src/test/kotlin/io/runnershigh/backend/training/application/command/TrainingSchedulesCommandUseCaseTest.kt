@@ -55,7 +55,7 @@ class TrainingSchedulesCommandUseCaseTest {
             repository.save(match { schedule ->
                 schedule.title == dto.title &&
                         schedule.location == dto.location &&
-                        schedule.scheduledDate == dto.scheduleDate &&
+                        schedule.scheduledDate == dto.scheduledDate &&
                         schedule.description == dto.description
                 schedule.user == user
             })
@@ -67,7 +67,7 @@ class TrainingSchedulesCommandUseCaseTest {
     fun createTrainingSchedule_withPastDate_throwsException() {
         //given
         val pastDate = LocalDate.now().minusDays(1)
-        val dto = saveTrainingSchedule().copy(scheduleDate = pastDate, title = "회복")
+        val dto = saveTrainingSchedule().copy(scheduledDate = pastDate, title = "회복")
         val user = userEntity()
 
         every { loginUserContext.getCurrentUser() } returns user
@@ -90,7 +90,7 @@ class TrainingSchedulesCommandUseCaseTest {
     private fun saveTrainingSchedule() = SaveTrainingSchedule(
         title = "템포런",
         location = "보라매공원",
-        scheduleDate = LocalDate.of(2025, 4, 5),
+        scheduledDate = LocalDate.of(2025, 4, 5),
         description = "빡세게 달려볼까"
     )
 

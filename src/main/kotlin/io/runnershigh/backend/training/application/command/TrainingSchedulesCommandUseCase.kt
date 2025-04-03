@@ -19,7 +19,7 @@ class TrainingSchedulesCommandUseCase(
 
     fun createTrainingSchedule(dto: SaveTrainingSchedule) {
         // step01. 훈련일자 값 검증 -> 훈련일자가 현재보다 이전일 수 없음
-        validateTrainingTime(dto.scheduleDate)
+        validateTrainingTime(dto.scheduledDate)
 
         repository.save(dto.toEntity(loginUserContext.getCurrentUser()))
     }
