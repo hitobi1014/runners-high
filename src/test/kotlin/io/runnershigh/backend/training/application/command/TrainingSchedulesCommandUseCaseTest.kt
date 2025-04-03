@@ -85,12 +85,32 @@ class TrainingSchedulesCommandUseCaseTest {
         }
     }
 
+    @Test
+    @DisplayName("당일 훈련일정 등록 테스트")
+    fun createTrainingSchedule_withCurrentDate() {
+        //given
+        val currentDate = LocalDate.now()
+        val dto = saveTrainingSchedule().copy(scheduledDate = currentDate)
+        val user = userEntity()
+
+        every { loginUserContext.getCurrentUser() } returns user
+        every { repository.save(ofType<TrainingSchedules>()) } returns dto.toEntity(user)
+
+        //when
+        useCase.createTrainingSchedule(dto)
+
+        //then
+        verify(exactly = 1) {
+            repository.save(any())
+        }
+    }
+
     private fun userEntity() = UserFixture.createDefault(id = 1)
 
     private fun saveTrainingSchedule() = SaveTrainingSchedule(
         title = "템포런",
         location = "보라매공원",
-        scheduledDate = LocalDate.of(2025, 4, 5),
+        scheduledDate = LocalDate.now().plusDays(5),
         description = "빡세게 달려볼까"
     )
 
