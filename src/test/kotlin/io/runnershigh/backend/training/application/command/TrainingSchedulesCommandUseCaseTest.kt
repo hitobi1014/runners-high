@@ -105,6 +105,32 @@ class TrainingSchedulesCommandUseCaseTest {
         }
     }
 
+    @Test
+    @DisplayName("훈련일정 날짜가 1년이후로 등록시 오류발생")
+    fun createTrainingSchedule_withFutureDate_throwsException() {
+        //given
+        val futureDate = LocalDate.now().plusDays(366)
+        val dto = saveTrainingSchedule().copy(scheduledDate = futureDate, title = "마라톤")
+        val user = userEntity()
+
+        every { loginUserContext.getCurrentUser() } returns user
+
+        //when
+        //then
+        val exception = assertThrows<TrainingException> {
+            useCase.createTrainingSchedule(dto)
+        }
+
+        assertEquals(
+            TrainingExceptionType.CANNOT_REGISTER_TRAINING_BEYOND_ONE_YEAR,
+            exception.exceptionType
+        )
+
+        verify(exactly = 0) {
+            repository.save(any())
+        }
+    }
+
     private fun userEntity() = UserFixture.createDefault(id = 1)
 
     private fun saveTrainingSchedule() = SaveTrainingSchedule(
