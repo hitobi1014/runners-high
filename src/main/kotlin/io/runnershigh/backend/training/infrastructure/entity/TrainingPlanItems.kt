@@ -31,6 +31,14 @@ class TrainingPlanItems(
     @Comment("목표 페이스")
     var targetPace: LocalTime,
 
+    @Temporal(TemporalType.TIME)
+    @Comment("목표 페이스 시작 구간")
+    val targetStartPace: LocalTime,
+
+    @Temporal(TemporalType.TIME)
+    @Comment("목표 페이스 종료 구간")
+    val targetEndPace: LocalTime,
+
     @Comment("러닝타입코드")
     var runningTypeCode: Long,
 
