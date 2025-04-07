@@ -1,6 +1,8 @@
 package io.runnershigh.backend.training.application.command
 
 import io.runnershigh.backend.training.domain.mapper.toEntity
+import io.runnershigh.backend.training.exception.TrainingException
+import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.infrastructure.repository.command.TrainingPlanItemsRepository
@@ -23,9 +25,7 @@ class TrainingPlanItemsUseCase(
     }
 
     private fun getSchedule(scheduleId: Long): TrainingSchedules {
-        // TODO 에러 메세지 변경
         return trainingSchedulesRepository.findByIdOrNull(scheduleId)
-            ?: throw IllegalArgumentException("Schedule not found")
-
+            ?: throw TrainingException(TrainingExceptionType.CANNOT_FOUND_TRAINING_SCHEDULE)
     }
 }

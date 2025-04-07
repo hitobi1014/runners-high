@@ -18,5 +18,13 @@ enum class TrainingExceptionType(
         errorCode = "TRAINING_002",
         httpStatus = HttpStatus.BAD_REQUEST,
         message = "최대 1년까지만 훈련 일정을 등록할 수 있습니다."
+    ),
+
+    CANNOT_FOUND_TRAINING_SCHEDULE(
+        errorCode = "TRAINING_003",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "해당 정보로 등록된 훈련 일정을 찾을 수 없습니다."
     )
+
+
 }
