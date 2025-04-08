@@ -26,7 +26,7 @@ class TrainingPlanGroupUseCase(
         return trainingPlanGroupRepository.save(trainingPlanGroupEntity)
     }
 
-    fun getTrainingSchedule(id: Long): TrainingSchedules {
+    private fun getTrainingSchedule(id: Long): TrainingSchedules {
         return trainingSchedulesRepository.findByIdOrNull(id) ?: throw TrainingException(
             TrainingExceptionType.CANNOT_FOUND_TRAINING_SCHEDULE
         )
