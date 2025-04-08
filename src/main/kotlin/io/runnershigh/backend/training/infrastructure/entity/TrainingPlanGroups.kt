@@ -9,7 +9,7 @@ import org.hibernate.annotations.Comment
 class TrainingPlanGroups(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0L,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
