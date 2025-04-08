@@ -1,13 +1,13 @@
 package io.runnershigh.backend.user.util
 
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class LoginUserContext(
-    private val userQueryRepository: UserQueryRepository,
+    private val userRepository: UserRepository,
 ) {
     private fun getCurrentContextUserId(): Int {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -16,7 +16,7 @@ class LoginUserContext(
 
     fun getCurrentUser(): UserEntity {
         val userId = getCurrentContextUserId()
-        return userQueryRepository.findById(userId)
+        return userRepository.findById(userId)
             .orElseThrow { IllegalStateException("User not found") } // TODO 예외 변경하기
     }
 }

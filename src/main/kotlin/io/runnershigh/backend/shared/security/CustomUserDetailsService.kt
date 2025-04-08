@@ -1,7 +1,7 @@
 package io.runnershigh.backend.shared.security
 
 import io.runnershigh.backend.user.domain.enum.UserStatus
-import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.UserRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CustomUserDetailsService(
-    private val userQueryRepository: UserQueryRepository,
+    private val userRepository: UserRepository,
 ) : UserDetailsService {
 
     @Transactional(readOnly = true)
     override fun loadUserByUsername(loginId: String): UserDetails {
-        userQueryRepository.findByLoginId(loginId)
+        userRepository.findByLoginId(loginId)
             ?.takeIf { user -> user.userStatus == UserStatus.ACTIVE }
             ?.let { user ->
                 // 설계에서 별도의 권한 없음, 추후 권한 생기면 교체

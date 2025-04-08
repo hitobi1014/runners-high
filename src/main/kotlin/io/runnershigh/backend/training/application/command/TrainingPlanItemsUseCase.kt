@@ -5,8 +5,8 @@ import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.infrastructure.repository.command.TrainingPlanItemsRepository
-import io.runnershigh.backend.training.infrastructure.repository.command.TrainingSchedulesCommandRepository
+import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanItemsRepository
+import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.training.ui.dto.SaveTrainingPlanItem
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class TrainingPlanItemsUseCase(
     private val trainingPlanItemsRepository: TrainingPlanItemsRepository,
-    private val trainingSchedulesRepository: TrainingSchedulesCommandRepository,
+    private val trainingSchedulesRepository: TrainingSchedulesRepository,
 ) {
 
     fun createTrainingItems(scheduleId: Long, dto: SaveTrainingPlanItem): TrainingPlanItems {

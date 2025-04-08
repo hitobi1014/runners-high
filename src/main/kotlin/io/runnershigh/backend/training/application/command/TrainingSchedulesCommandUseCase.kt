@@ -4,7 +4,7 @@ import io.runnershigh.backend.training.domain.mapper.toEntity
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.infrastructure.repository.command.TrainingSchedulesCommandRepository
+import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.training.ui.dto.SaveTrainingSchedule
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.springframework.stereotype.Service
@@ -15,7 +15,7 @@ import java.time.ZoneId
 @Service
 @Transactional
 class TrainingSchedulesCommandUseCase(
-    private val repository: TrainingSchedulesCommandRepository,
+    private val repository: TrainingSchedulesRepository,
     private val loginUserContext: LoginUserContext,
 ) {
     private val MAX_FUTURE_DAYS = 365L

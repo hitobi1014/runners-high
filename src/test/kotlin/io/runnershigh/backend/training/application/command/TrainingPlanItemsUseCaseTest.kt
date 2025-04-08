@@ -9,8 +9,8 @@ import io.runnershigh.backend.training.domain.enum.DistanceUnit
 import io.runnershigh.backend.training.domain.enum.TargetType
 import io.runnershigh.backend.training.domain.mapper.toEntity
 import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
-import io.runnershigh.backend.training.infrastructure.repository.command.TrainingPlanItemsRepository
-import io.runnershigh.backend.training.infrastructure.repository.command.TrainingSchedulesCommandRepository
+import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanItemsRepository
+import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.training.ui.dto.SaveTrainingPlanItem
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +27,7 @@ class TrainingPlanItemsUseCaseTest {
     private lateinit var planItemsRepository: TrainingPlanItemsRepository
 
     @MockK
-    private lateinit var scheduleRepository: TrainingSchedulesCommandRepository
+    private lateinit var scheduleRepository: TrainingSchedulesRepository
 
     private lateinit var useCase: TrainingPlanItemsUseCase
 

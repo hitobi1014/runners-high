@@ -7,7 +7,7 @@ import io.mockk.verify
 import io.runnershigh.backend.user.domain.enum.AgeGroup
 import io.runnershigh.backend.user.domain.enum.Gender
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.infrastructure.repository.query.UserQueryRepository
+import io.runnershigh.backend.user.infrastructure.repository.UserRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -20,12 +20,12 @@ import java.util.*
 
 class LoginUserContextTest {
     private lateinit var loginUserContext: LoginUserContext
-    private lateinit var userQueryRepository: UserQueryRepository
+    private lateinit var userRepository: UserRepository
 
     @BeforeEach
     fun setup() {
-        userQueryRepository = mockk()
-        loginUserContext = LoginUserContext(userQueryRepository)
+        userRepository = mockk()
+        loginUserContext = LoginUserContext(userRepository)
     }
 
     @AfterEach
@@ -44,7 +44,7 @@ class LoginUserContextTest {
         SecurityContextHolder.setContext(securityContext)
 
         val mockUser = createUser()
-        every { userQueryRepository.findById(123) } returns Optional.of(mockUser)
+        every { userRepository.findById(123) } returns Optional.of(mockUser)
 
         // when
         val user = loginUserContext.getCurrentUser()
@@ -53,7 +53,7 @@ class LoginUserContextTest {
         assertNotNull(user)
         assertEquals(123, user.id)
         assertEquals("한강", user.nickname)
-        verify { userQueryRepository.findById(123) }
+        verify { userRepository.findById(123) }
     }
 
     @Test
@@ -64,13 +64,13 @@ class LoginUserContextTest {
         every { securityContext.authentication } returns authentication
         SecurityContextHolder.setContext(securityContext)
 
-        every { userQueryRepository.findById(123) } returns Optional.empty()
+        every { userRepository.findById(123) } returns Optional.empty()
 
         val exception =
             assertThrows(IllegalStateException::class.java) { loginUserContext.getCurrentUser() }
 
         assertEquals("User not found", exception.message)
-        verify { userQueryRepository.findById(123) }
+        verify { userRepository.findById(123) }
     }
 
     private fun createUser(): UserEntity {
