@@ -20,6 +20,6 @@ class LoginUserContext(
     fun getCurrentUser(): UserEntity {
         val userId = getCurrentContextUserId()
         return userRepository.findByIdOrNull(userId)
-            ?: throw UserException(UserExceptionType.CANNOT_FOUND_USER)
+            ?: throw UserException(UserExceptionType.USER_NOT_FOUND)
     }
 }

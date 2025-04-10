@@ -6,13 +6,13 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.runnershigh.backend.user.domain.enum.AgeGroup
 import io.runnershigh.backend.user.domain.enum.Gender
+import io.runnershigh.backend.user.exception.UserException
+import io.runnershigh.backend.user.exception.UserExceptionType
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
 import io.runnershigh.backend.user.infrastructure.repository.UserRepository
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -67,9 +67,9 @@ class LoginUserContextTest {
         every { userRepository.findById(123) } returns Optional.empty()
 
         val exception =
-            assertThrows(IllegalStateException::class.java) { loginUserContext.getCurrentUser() }
+            assertThrows<UserException> { loginUserContext.getCurrentUser() }
 
-        assertEquals("User not found", exception.message)
+        assertEquals(UserExceptionType.USER_NOT_FOUND.message, exception.message)
         verify { userRepository.findById(123) }
     }
 
