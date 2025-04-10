@@ -22,9 +22,9 @@ enum class TrainingExceptionType(
 
     CANNOT_FOUND_TRAINING_SCHEDULE(
         errorCode = "TRAINING_003",
-        httpStatus = HttpStatus.BAD_REQUEST,
+        httpStatus = HttpStatus.NOT_FOUND,
         message = "해당 정보로 등록된 훈련 일정을 찾을 수 없습니다."
-    )
+    ),
 
 
 }
