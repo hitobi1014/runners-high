@@ -7,7 +7,7 @@ import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.SaveTrainingPlanItem
+import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanItem
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

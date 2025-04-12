@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.ui.dto
+package io.runnershigh.backend.training.ui.dto.request
 
 import io.runnershigh.backend.training.domain.enum.DistanceUnit
 import io.runnershigh.backend.training.domain.enum.TargetType

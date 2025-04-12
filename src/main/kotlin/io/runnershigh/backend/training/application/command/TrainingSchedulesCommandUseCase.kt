@@ -5,7 +5,7 @@ import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.SaveTrainingSchedule
+import io.runnershigh.backend.training.ui.dto.request.SaveTrainingSchedule
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

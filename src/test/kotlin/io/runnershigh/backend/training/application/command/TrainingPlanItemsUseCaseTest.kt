@@ -11,7 +11,7 @@ import io.runnershigh.backend.training.domain.mapper.toEntity
 import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
 import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.SaveTrainingPlanItem
+import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanItem
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
