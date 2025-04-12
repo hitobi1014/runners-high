@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 object TrainingScheduleFixture {
     fun createDefault(
-        id: Long = 1L,
+        id: Long = 0,
         user: UserEntity = UserFixture.createDefault(),
         title: String = "하프마라톤 대비",
         location: String = "보라매 공원",
