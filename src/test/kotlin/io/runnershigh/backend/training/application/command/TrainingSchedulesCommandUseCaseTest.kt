@@ -26,6 +26,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 class TrainingSchedulesCommandUseCaseTest {
@@ -153,12 +154,12 @@ class TrainingSchedulesCommandUseCaseTest {
         every { trainingScheduleQuerydsl.findByUser(mockUser) } returns mockTrainingSchedules
 
         // when
-        val result = useCase.getTrainingSchedules(LocalDate.now())
+        val result = useCase.getTrainingSchedules()
 
         // then
         assertEquals(2, result.size)
-        assertEquals(TrainingStatus.PLANNED, result[0].status)
-        assertEquals("훈련1", result[1].title)
+        assertTrue(result.any { it.status == TrainingStatus.PLANNED })
+        assertTrue(result.any { it.title == "훈련1" }) // 특정 순서에 종속되지 않고 포함만 되어있으면 검증 성공
 
         verify {
             loginUserContext.getCurrentUser()
@@ -229,18 +230,6 @@ class TrainingSchedulesCommandUseCaseTest {
             mockSchedule2.toDto()
         }
     }
-
-    private fun makeReadTrainingScheduleDto(
-        id: Long, scheduledDate: LocalDate, status: TrainingStatus = TrainingStatus.PLANNED,
-        title: String = "title", location: String = "location", description: String = "description",
-    ) = ReadTrainingSchedule(
-        id = id,
-        scheduledDate = scheduledDate,
-        status = status,
-        title = title,
-        location = location,
-        description = description
-    )
 
     private fun userEntity() = UserFixture.createDefault(id = 1)
 

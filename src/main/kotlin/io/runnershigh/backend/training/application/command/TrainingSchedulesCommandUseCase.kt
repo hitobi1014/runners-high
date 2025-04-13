@@ -32,7 +32,7 @@ class TrainingSchedulesCommandUseCase(
         return trainingSchedulesRepository.save(dto.toEntity(loginUserContext.getCurrentUser()))
     }
 
-    fun getTrainingSchedules(date: LocalDate): List<ReadTrainingSchedule> {
+    fun getTrainingSchedules(): List<ReadTrainingSchedule> {
         // #1. 현재 로그인 유저 가져오기
         val loginUser = loginUserContext.getCurrentUser()
 
@@ -61,8 +61,13 @@ class TrainingSchedulesCommandUseCase(
     }
 
     fun getNextUpcomingTrainingSchedule(): ReadTrainingSchedule? {
+        // #1. 현재 로그인 유저 가져오기
         val loginUser = loginUserContext.getCurrentUser()
+
+        // #2. 다음 예정된 훈련 일정 가져오기
         val trainingSchedule = trainingScheduleQuerydsl.findNextUpcomingScheduleByUser(loginUser)
+
+        // #3. 엔티티 -> Schedule 변환
         return trainingSchedule?.toDto()
     }
 

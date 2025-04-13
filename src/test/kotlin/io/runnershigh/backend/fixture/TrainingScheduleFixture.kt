@@ -30,7 +30,7 @@ object TrainingScheduleFixture {
     }
 
     fun createReadTrainingSchedule(
-        id: Long = 1L,
+        id: Long = 0,
         title: String = "훈련1",
         location: String = "여의도 공원",
         scheduledDate: LocalDate = LocalDate.now(),

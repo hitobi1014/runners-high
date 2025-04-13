@@ -31,8 +31,8 @@ data class SaveTrainingPlanItem(
     val targetDistance: Double?,
     val targetTime: LocalTime?,
 
-    var estimatedDistance: Double?,
-    var estimatedTime: LocalTime?,
+    val estimatedDistance: Double?,
+    val estimatedTime: LocalTime?,
 
     val note: String?,
 )
