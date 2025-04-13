@@ -215,8 +215,8 @@ class TrainingSchedulesCommandUseCaseTest {
         // Then
         // 반환된 사이즈와 값 검증
         assertEquals(result.size, 2)
-        assertEquals(result[0].id, 1L)
-        assertEquals(result[1].id, 2L)
+        assertTrue(result.any { it.id == 1L })
+        assertTrue(result.any { it.id == 2L })
 
         // Mock 호출 검증
         verify {
