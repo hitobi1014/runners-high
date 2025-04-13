@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.ui.dto
+package io.runnershigh.backend.training.ui.dto.request
 
 import io.runnershigh.backend.training.domain.enum.DistanceUnit
 import io.runnershigh.backend.training.domain.enum.TargetType
@@ -31,8 +31,8 @@ data class SaveTrainingPlanItem(
     val targetDistance: Double?,
     val targetTime: LocalTime?,
 
-    var estimatedDistance: Double?,
-    var estimatedTime: LocalTime?,
+    val estimatedDistance: Double?,
+    val estimatedTime: LocalTime?,
 
     val note: String?,
 )

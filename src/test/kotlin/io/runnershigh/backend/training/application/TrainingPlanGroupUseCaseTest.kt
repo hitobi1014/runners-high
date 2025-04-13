@@ -12,7 +12,7 @@ import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanGroupRepository
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.SaveTrainingPlanGroup
+import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanGroup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

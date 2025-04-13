@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.ui.dto
+package io.runnershigh.backend.training.ui.dto.request
 
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
