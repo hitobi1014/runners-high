@@ -4,6 +4,17 @@ import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanItem
 
+/**
+ * Converts this [SaveTrainingPlanItem] DTO to a [TrainingPlanItems] entity.
+ *
+ * The function maps corresponding properties from the DTO to the entity and associates the
+ * result with the provided [TrainingSchedules]. This includes transferring values such as item order,
+ * pace targets, running type code, distance unit, target and estimated values for distance and time,
+ * as well as any note.
+ *
+ * @param schedule the training schedule to be associated with the training plan item.
+ * @return a new [TrainingPlanItems] entity with values derived from this DTO.
+ */
 fun SaveTrainingPlanItem.toEntity(schedule: TrainingSchedules) = TrainingPlanItems(
     schedule = schedule,
     itemOrder = this.itemOrder,

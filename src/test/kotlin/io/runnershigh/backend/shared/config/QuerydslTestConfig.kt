@@ -7,6 +7,13 @@ import org.springframework.context.annotation.Bean
 
 @TestConfiguration
 class QuerydslTestConfig {
+    /**
+     * Creates a Querydsl JPAQueryFactory bean for constructing type-safe JPA queries.
+     *
+     * This method initializes the factory with the provided EntityManager, enabling its use in tests.
+     *
+     * @return a new JPAQueryFactory instance configured with the given EntityManager.
+     */
     @Bean
     fun jpaQueryFactory(entityManager: EntityManager): JPAQueryFactory {
         return JPAQueryFactory(entityManager)

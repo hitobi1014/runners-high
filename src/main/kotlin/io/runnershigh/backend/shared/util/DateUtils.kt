@@ -8,10 +8,12 @@ object DateUtils {
 
 
     /**
-     * 주어진 날짜 또는 현재 날짜를 기준으로 가장 가까운 이전 일요일 날짜를 반환합니다.
+     * Returns the most recent Sunday relative to the provided date.
      *
-     * @param date 기준 날짜 (기본값: 현재 날짜)
-     * @return 가장 가까운 이전 일요일 날짜
+     * If the given date is a Sunday, that date is returned; otherwise, the previous Sunday is computed.
+     *
+     * @param date the base date to evaluate (defaults to the current date)
+     * @return the date corresponding to the most recent Sunday
      */
     fun findPreviousSunday(date: LocalDate = LocalDate.now()): LocalDate {
         return if (date.dayOfWeek == DayOfWeek.SUNDAY) {
@@ -23,10 +25,13 @@ object DateUtils {
 
 
     /**
-     * 주어진 날짜 또는 현재 날짜를 기준으로 가장 가까운 이후 토요일 날짜를 반환합니다.
+     * Returns the next Saturday based on the given date.
      *
-     * @param date 기준 날짜 (기본값: 현재 날짜)
-     * @return 가장 가까운 이후 토요일 날짜
+     * If the specified date is already a Saturday, the same date is returned.
+     * Otherwise, the function computes the upcoming Saturday from the provided date.
+     *
+     * @param date The reference date, defaulting to the current date.
+     * @return The date of the next Saturday relative to the given date.
      */
     fun findNextSaturday(date: LocalDate = LocalDate.now()): LocalDate {
         return if (date.dayOfWeek == DayOfWeek.SATURDAY) {
@@ -38,12 +43,12 @@ object DateUtils {
 
 
     /**
-     * 주어진 날짜 또는 현재 날짜를 기준으로 해당 주의 경계를 반환합니다.
+     * Returns the week boundaries based on the provided date or the current date.
      *
-     * 경계는 가장 가까운 이전 일요일과 이후 토요일로 정의됩니다.
+     * The boundaries are defined as the closest previous Sunday and the next Saturday.
      *
-     * @param date 기준 날짜 (기본값: 현재 날짜)
-     * @return 해당 주의 경계를 나타내는 Pair (이전 일요일, 이후 토요일)
+     * @param date the reference date (defaults to the current date)
+     * @return a pair where the first element is the previous Sunday and the second element is the next Saturday
      */
     fun getWeekBoundaries(date: LocalDate = LocalDate.now()): Pair<LocalDate, LocalDate> {
         val previousSunday = findPreviousSunday(date)
