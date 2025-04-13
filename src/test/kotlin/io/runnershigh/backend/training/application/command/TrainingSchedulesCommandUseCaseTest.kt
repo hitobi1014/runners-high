@@ -1,16 +1,23 @@
 package io.runnershigh.backend.training.application.command
 
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import io.runnershigh.backend.fixture.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
+import io.runnershigh.backend.shared.util.DateUtils
+import io.runnershigh.backend.training.domain.enum.TrainingStatus
+import io.runnershigh.backend.training.domain.mapper.toDto
 import io.runnershigh.backend.training.domain.mapper.toEntity
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.training.infrastructure.repository.querydsl.TrainingScheduleQuerydsl
 import io.runnershigh.backend.training.ui.dto.request.SaveTrainingSchedule
+import io.runnershigh.backend.training.ui.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -27,13 +34,17 @@ class TrainingSchedulesCommandUseCaseTest {
     private lateinit var repository: TrainingSchedulesRepository
 
     @MockK
+    private lateinit var trainingScheduleQuerydsl: TrainingScheduleQuerydsl
+
+    @MockK
     private lateinit var loginUserContext: LoginUserContext
 
     private lateinit var useCase: TrainingSchedulesCommandUseCase
 
     @BeforeEach
     fun setup() {
-        useCase = TrainingSchedulesCommandUseCase(repository, loginUserContext)
+        useCase =
+            TrainingSchedulesCommandUseCase(repository, trainingScheduleQuerydsl, loginUserContext)
     }
 
     @Test
@@ -130,6 +141,106 @@ class TrainingSchedulesCommandUseCaseTest {
             repository.save(any())
         }
     }
+
+    @Test
+    @DisplayName("유저가 등록한 훈련일정 전체 목록 가져오기")
+    fun getTrainingSchedules() {
+        //given
+        val mockUser = userEntity()
+        val mockTrainingSchedules = TrainingScheduleFixture.createMultipleEntityMocks(2)
+
+        every { loginUserContext.getCurrentUser() } returns mockUser
+        every { trainingScheduleQuerydsl.findByUser(mockUser) } returns mockTrainingSchedules
+
+        // when
+        val result = useCase.getTrainingSchedules(LocalDate.now())
+
+        // then
+        assertEquals(2, result.size)
+        assertEquals(TrainingStatus.PLANNED, result[0].status)
+        assertEquals("훈련1", result[1].title)
+
+        verify {
+            loginUserContext.getCurrentUser()
+            trainingScheduleQuerydsl.findByUser(mockUser)
+            mockTrainingSchedules[0].toDto()
+            mockTrainingSchedules[1].toDto()
+        }
+
+        confirmVerified(
+            loginUserContext,
+            trainingScheduleQuerydsl,
+            *mockTrainingSchedules.toTypedArray()
+        )
+    }
+
+    @Test
+    @DisplayName("유저가 등록한 이번 주(일-토) 훈련일정 목록 가져오기")
+    fun getCurrentlyPlannedTrainingSchedules() {
+        // Given
+        val currentDate = LocalDate.now()
+
+        // Mock - 'getCurrentUser' 반환
+        val mockUser = userEntity()
+        every { loginUserContext.getCurrentUser() } returns mockUser
+
+        // Mock - 'DateUtils.getWeekBoundaries' 함수 값 설정
+        val previousSunday = DateUtils.findPreviousSunday(currentDate) // 지난 일요일
+        val nextSaturday = DateUtils.findNextSaturday(currentDate) // 다음 토요일
+
+        // Mock - 일정 반환될 리스트 및 각 엔티티 설정
+        val mockSchedule1 = TrainingScheduleFixture.createEntityMock(
+            id = 1L,
+            scheduledDate = previousSunday.plusDays(1)
+        )
+        val mockSchedule2 = TrainingScheduleFixture.createEntityMock(
+            id = 2L,
+            scheduledDate = nextSaturday.minusDays(3)
+        )
+        val mockTrainingSchedules = listOf(mockSchedule1, mockSchedule2)
+
+        // Mock - 'findCurrentWeekSchedulesByUser' 반환값
+        every {
+            trainingScheduleQuerydsl.findCurrentWeekSchedulesByUser(
+                user = mockUser,
+                previousSunday = previousSunday,
+                nextSaturday = nextSaturday
+            )
+        } returns mockTrainingSchedules
+
+        // When
+        val result = useCase.getCurrentWeekTrainingSchedules()
+
+        // Then
+        // 반환된 사이즈와 값 검증
+        assertEquals(result.size, 2)
+        assertEquals(result[0].id, 1L)
+        assertEquals(result[1].id, 2L)
+
+        // Mock 호출 검증
+        verify {
+            loginUserContext.getCurrentUser()
+            trainingScheduleQuerydsl.findCurrentWeekSchedulesByUser(
+                user = mockUser,
+                previousSunday = previousSunday,
+                nextSaturday = nextSaturday
+            )
+            mockSchedule1.toDto()
+            mockSchedule2.toDto()
+        }
+    }
+
+    private fun makeReadTrainingScheduleDto(
+        id: Long, scheduledDate: LocalDate, status: TrainingStatus = TrainingStatus.PLANNED,
+        title: String = "title", location: String = "location", description: String = "description",
+    ) = ReadTrainingSchedule(
+        id = id,
+        scheduledDate = scheduledDate,
+        status = status,
+        title = title,
+        location = location,
+        description = description
+    )
 
     private fun userEntity() = UserFixture.createDefault(id = 1)
 

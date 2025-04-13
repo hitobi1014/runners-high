@@ -41,7 +41,6 @@ class TrainingSchedulesCommandUseCase(
 
         // #3. 엔티티 -> Schedule 변환
         return trainingSchedulesList.map(TrainingSchedules::toDto)
-//        return trainingSchedulesList.map { it.toDto() }
     }
 
     fun getCurrentWeekTrainingSchedules(): List<ReadTrainingSchedule> {
