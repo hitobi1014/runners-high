@@ -15,4 +15,5 @@ data class SaveTrainingSchedule(
     val scheduledDate: LocalDate,
     val description: String = "",
     val status: TrainingStatus = TrainingStatus.PLANNED,
+    val color: String,
 )
