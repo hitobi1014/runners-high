@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity
 
 object ResponseUtils {
 
-
     /**
      * 요청이 성공했음을 나타내는 응답을 생성합니다.
      *
