@@ -17,6 +17,7 @@ object TrainingScheduleFixture {
         description: String = "보라매 공원 가볍게 러닝",
         scheduledDate: LocalDate = LocalDate.now(),
         status: TrainingStatus = TrainingStatus.PLANNED,
+        color: String = "#B5EAD7",
     ): TrainingSchedules {
         return TrainingSchedules(
             id = id,
@@ -26,6 +27,7 @@ object TrainingScheduleFixture {
             description = description,
             scheduledDate = scheduledDate,
             status = status,
+            color = color
         )
     }
 
@@ -36,6 +38,7 @@ object TrainingScheduleFixture {
         scheduledDate: LocalDate = LocalDate.now(),
         description: String = "고구마 캐기",
         status: TrainingStatus = TrainingStatus.PLANNED,
+        color: String = "#B5EAD7",
     ): ReadTrainingSchedule {
         return ReadTrainingSchedule(
             id = id,
@@ -44,6 +47,7 @@ object TrainingScheduleFixture {
             scheduledDate = scheduledDate,
             description = description,
             status = status,
+            color = color
         )
     }
 
@@ -61,6 +65,7 @@ object TrainingScheduleFixture {
             every { this@apply.title } returns dto.title
             every { this@apply.location } returns dto.location
             every { this@apply.description } returns dto.description
+            every { this@apply.color } returns dto.color
         }
     }
 
