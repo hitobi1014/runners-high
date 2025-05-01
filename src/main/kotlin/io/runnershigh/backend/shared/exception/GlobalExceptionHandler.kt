@@ -28,7 +28,7 @@ class GlobalExceptionHandler {
             .body(
                 ApiResponse.error<Nothing>(
                     status = HttpStatus.BAD_REQUEST,
-                    code = "VALIDATION-001",
+                    code = ErrorCodes.VALIDATION_ERROR.errorCode,
                     message = errorMessage
                 )
             )

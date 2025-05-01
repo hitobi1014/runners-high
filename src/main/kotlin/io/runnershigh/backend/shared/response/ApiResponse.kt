@@ -14,7 +14,7 @@ class ApiResponse<T> private constructor(
     val error: ErrorInfo?,
 ) {
     companion object {
-        // 성공 (데이터 o)
+        // 성공 - 데이터 있는 경우
         fun <T> success(
             data: T,
             message: String? = null,
@@ -29,7 +29,7 @@ class ApiResponse<T> private constructor(
             )
         }
 
-        // 성공 (데이터 x)
+        // 성공 - 데이터 없는 경우
         fun success(
             message: String? = "성공",
             status: HttpStatus = HttpStatus.OK,
@@ -75,7 +75,6 @@ class ApiResponse<T> private constructor(
             )
         }
 
-        
         /**
          * ApiResponse를 ResponseEntity 형태로 반환합니다.
          *
@@ -88,6 +87,13 @@ class ApiResponse<T> private constructor(
     }
 }
 
+
+/**
+ * 오류 정보를 담는 클래스입니다.
+ *
+ * @property code 에러 코드
+ * @property message 에러 메시지
+ */
 data class ErrorInfo(
     val code: String,
     val message: String,

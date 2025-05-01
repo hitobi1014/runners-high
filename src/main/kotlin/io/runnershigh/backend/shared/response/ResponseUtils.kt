@@ -52,7 +52,6 @@ object ResponseUtils {
         return success(data, message, HttpStatus.CREATED)
     }
 
-
     /**
      * 요청이 실패했음을 나타내는 응답을 생성합니다.
      *
@@ -70,7 +69,6 @@ object ResponseUtils {
         return ResponseEntity.status(status)
             .body(ApiResponse.error(status, code, message))
     }
-
 
     /**
      * BaseException을 기반으로 요청이 실패했음을 나타내는 응답을 생성합니다.

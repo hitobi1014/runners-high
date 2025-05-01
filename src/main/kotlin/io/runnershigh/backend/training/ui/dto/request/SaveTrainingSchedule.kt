@@ -4,6 +4,7 @@ import io.runnershigh.backend.training.domain.enum.TrainingStatus
 import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
 
 data class SaveTrainingSchedule(
@@ -15,5 +16,9 @@ data class SaveTrainingSchedule(
     val scheduledDate: LocalDate,
     val description: String = "",
     val status: TrainingStatus = TrainingStatus.PLANNED,
+    @field:NotNull(message = "색상은 필수입니다.")
+    @field:Pattern(
+        regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", message = "올바른 HEX 색상 코드 형식이어야 합니다."
+    )
     val color: String,
 )
