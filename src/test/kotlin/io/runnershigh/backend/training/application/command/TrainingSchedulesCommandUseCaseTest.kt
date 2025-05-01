@@ -237,7 +237,8 @@ class TrainingSchedulesCommandUseCaseTest {
         title = "템포런",
         location = "보라매공원",
         scheduledDate = LocalDate.now().plusDays(5),
-        description = "빡세게 달려볼까"
+        description = "빡세게 달려볼까",
+        color = "#B5EAD7"
     )
 
 

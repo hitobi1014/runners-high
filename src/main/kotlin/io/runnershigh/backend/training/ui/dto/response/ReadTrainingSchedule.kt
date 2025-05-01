@@ -10,4 +10,5 @@ data class ReadTrainingSchedule(
     val scheduledDate: LocalDate,
     val description: String,
     val status: TrainingStatus,
+    val color: String,
 )

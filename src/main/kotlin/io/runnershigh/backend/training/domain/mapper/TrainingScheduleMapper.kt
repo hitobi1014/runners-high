@@ -12,7 +12,8 @@ fun SaveTrainingSchedule.toEntity(user: UserEntity) = TrainingSchedules(
     location = this.location,
     scheduledDate = this.scheduledDate,
     description = this.description,
-    status = this.status
+    status = this.status,
+    color = this.color
 )
 
 // response
@@ -22,5 +23,6 @@ fun TrainingSchedules.toDto() = ReadTrainingSchedule(
     location = this.location,
     scheduledDate = this.scheduledDate,
     description = this.description,
-    status = this.status
+    status = this.status,
+    color = this.color
 )

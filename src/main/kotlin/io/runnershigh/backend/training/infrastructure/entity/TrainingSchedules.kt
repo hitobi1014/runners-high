@@ -37,6 +37,9 @@ class TrainingSchedules(
     @Comment("훈련일정 상태")
     var status: TrainingStatus,
 
+    @Comment("색상")
+    var color: String,
+
     // 양방향 설정, 훈련일정 삭제시 그룹도 함께 삭제
     // orphanRemoval = 컬렉션에서 삭제시, DB에서도 삭제
     @OneToMany(mappedBy = "schedule", cascade = [CascadeType.REMOVE], orphanRemoval = true)
