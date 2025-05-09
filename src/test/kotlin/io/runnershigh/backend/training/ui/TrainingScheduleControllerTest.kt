@@ -67,4 +67,13 @@ class TrainingScheduleControllerTest {
         //then
         verify { trainingScheduleUseCase.getNextUpcomingTrainingSchedule() }
     }
+
+    @Test
+    fun `이번 주에 등록된 훈련 일정 목록을 조회한다`() {
+        //given
+
+        //when
+
+        //then
+    }
 }
