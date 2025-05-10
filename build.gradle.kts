@@ -80,6 +80,9 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:$koVersion")
     testImplementation("io.kotest:kotest-assertions-core:$koVersion")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
+
+    // dummy data 생성
+    implementation("net.datafaker:datafaker:2.4.2")
 }
 
 kotlin {
