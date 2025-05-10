@@ -22,6 +22,9 @@ repositories {
     mavenCentral()
 }
 
+
+val koVersion = "5.7.2"
+
 dependencies {
     // spring
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -72,6 +75,11 @@ dependencies {
     // MockK 관련 라이브러리
     testImplementation("io.mockk:mockk:1.13.9") // MockK 코어 라이브러리
     testImplementation("com.ninja-squad:springmockk:4.0.2") // Spring 통합용 MockK
+
+    // kotest
+    testImplementation("io.kotest:kotest-runner-junit5:$koVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$koVersion")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
 }
 
 kotlin {
