@@ -8,6 +8,7 @@ import io.mockk.verify
 import io.runnershigh.backend.fixture.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.util.DateUtils
+import io.runnershigh.backend.training.application.TrainingSchedulesUseCase
 import io.runnershigh.backend.training.domain.enum.TrainingStatus
 import io.runnershigh.backend.training.domain.mapper.toDto
 import io.runnershigh.backend.training.domain.mapper.toEntity
@@ -17,7 +18,6 @@ import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
 import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.training.infrastructure.repository.querydsl.TrainingScheduleQuerydsl
 import io.runnershigh.backend.training.ui.dto.request.SaveTrainingSchedule
-import io.runnershigh.backend.training.ui.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
-class TrainingSchedulesCommandUseCaseTest {
+class TrainingSchedulesUseCaseTest {
 
     @MockK
     private lateinit var repository: TrainingSchedulesRepository
@@ -40,12 +40,12 @@ class TrainingSchedulesCommandUseCaseTest {
     @MockK
     private lateinit var loginUserContext: LoginUserContext
 
-    private lateinit var useCase: TrainingSchedulesCommandUseCase
+    private lateinit var useCase: TrainingSchedulesUseCase
 
     @BeforeEach
     fun setup() {
         useCase =
-            TrainingSchedulesCommandUseCase(repository, trainingScheduleQuerydsl, loginUserContext)
+            TrainingSchedulesUseCase(repository, trainingScheduleQuerydsl, loginUserContext)
     }
 
     @Test

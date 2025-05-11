@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.application.command
+package io.runnershigh.backend.training.application
 
 import io.runnershigh.backend.shared.util.DateUtils
 import io.runnershigh.backend.training.domain.mapper.toDto
@@ -18,7 +18,7 @@ import java.time.ZoneId
 
 @Service
 @Transactional
-class TrainingSchedulesCommandUseCase(
+class TrainingSchedulesUseCase(
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
     private val trainingScheduleQuerydsl: TrainingScheduleQuerydsl,
     private val loginUserContext: LoginUserContext,
