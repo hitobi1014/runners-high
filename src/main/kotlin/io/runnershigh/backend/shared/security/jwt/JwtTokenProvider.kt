@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 import java.util.Date
@@ -15,7 +16,7 @@ import javax.crypto.SecretKey
 
 @Component
 class JwtTokenProvider(
-    private val userDetailService: UserDetailsService,
+//    private val userDetailService: UserDetailsService, // 사용여부 확인 후 제거
     @Value("\${jwt.secret-key}")
     private val secretString: String,
 
@@ -30,6 +31,7 @@ class JwtTokenProvider(
     fun generateToken(userId: Int, nickname: String): String {
         val claims = Jwts.claims().setSubject(userId.toString())
         claims["nickname"] = nickname
+        claims["role"] = "ROLE_USER"
 
         val now = Date()
         val expiredTime = Date(now.time + tokenExpireSeconds * 1000)
@@ -53,8 +55,16 @@ class JwtTokenProvider(
     }
 
     fun getAuthentication(token: String): Authentication {
-        val userDetails = userDetailService.loadUserByUsername(getUserId(token).toString())
-        return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
+//        val userDetails = userDetailService.loadUserByUsername(getUserId(token).toString())
+
+        val claims = getClaims(token)
+        val userId = claims.subject.toInt()
+
+        val role = claims["role"] as? String ?: "ROLE_USER"
+        val authorities = listOf(SimpleGrantedAuthority(role))
+
+//        return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
+        return UsernamePasswordAuthenticationToken(userId, null, authorities)
     }
 
     fun validateToken(token: String): Boolean {

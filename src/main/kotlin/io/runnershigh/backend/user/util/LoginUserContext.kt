@@ -4,6 +4,7 @@ import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
 import io.runnershigh.backend.user.infrastructure.repository.UserRepository
+import mu.KotlinLogging
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -12,9 +13,16 @@ import org.springframework.stereotype.Component
 class LoginUserContext(
     private val userRepository: UserRepository,
 ) {
+    private val logger = KotlinLogging.logger {}
+
     private fun getCurrentContextUserId(): Int {
         val authentication = SecurityContextHolder.getContext().authentication
-        return authentication.name?.toInt() ?: throw IllegalStateException("User not found")
+        try {
+            return authentication.name?.toInt() ?: throw IllegalStateException("User not found")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw UserException(UserExceptionType.USER_NOT_FOUND)
+        }
     }
 
     fun getCurrentUser(): UserEntity {
