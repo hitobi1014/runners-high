@@ -82,6 +82,10 @@ class TrainingScheduleControllerTest(
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.message").value(CommonResponseMessage.SUCCESS_GET_DATA.message))
                     .andExpect(jsonPath("$.data.length()").value(3))
+                    .andExpect(jsonPath("$.data[0].id").value(mockSchedule1.id))
+                    .andExpect(jsonPath("$.data[0].title").value(mockSchedule1.title))
+                    .andExpect(jsonPath("$.data[1].id").value(mockSchedule2.id))
+                    .andExpect(jsonPath("$.data[1].title").value(mockSchedule2.title))
 
                 verify(exactly = 1) { trainingScheduleUseCase.getCurrentWeekTrainingSchedules() }
             }

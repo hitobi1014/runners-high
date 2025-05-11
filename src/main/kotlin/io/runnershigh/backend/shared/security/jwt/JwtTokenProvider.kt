@@ -28,6 +28,15 @@ class JwtTokenProvider(
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString))
     }
 
+
+    /**
+     * JWT 토큰을 생성합니다.
+     *
+     * 현재는 따로 회원 엔티티에 별도의 Role이 없으므로 하드코딩으로 삽입
+     * @param userId 사용자의 고유 ID
+     * @param nickname 사용자의 닉네임
+     * @return 생성된 JWT 토큰 문자열
+     */
     fun generateToken(userId: Int, nickname: String): String {
         val claims = Jwts.claims().setSubject(userId.toString())
         claims["nickname"] = nickname
@@ -54,6 +63,13 @@ class JwtTokenProvider(
         return claims["nickname"].toString()
     }
 
+
+    /**
+     * JWT 토큰에서 인증 객체를 가져옵니다.
+     *
+     * @param token JWT 토큰
+     * @return 인증(Authentication) 객체
+     */
     fun getAuthentication(token: String): Authentication {
 //        val userDetails = userDetailService.loadUserByUsername(getUserId(token).toString())
 
@@ -67,6 +83,13 @@ class JwtTokenProvider(
         return UsernamePasswordAuthenticationToken(userId, null, authorities)
     }
 
+
+    /**
+     * 주어진 JWT 토큰이 유효한지 검증합니다.
+     *
+     * @param token 유효성 검사를 수행할 JWT 토큰
+     * @return 토큰이 유효하다면 true, 그렇지 않으면 false
+     */
     fun validateToken(token: String): Boolean {
         try {
             val claims = Jwts.parserBuilder()

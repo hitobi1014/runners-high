@@ -13,6 +13,7 @@ import net.datafaker.Faker
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.LocalDate
@@ -25,6 +26,7 @@ class DataInitializer(
     private val userRepository: UserRepository,
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
     private val jwtTokenProvider: JwtTokenProvider,
+    private val passwordEncoder: PasswordEncoder,
 ) : ApplicationRunner {
 
     private val faker = Faker(Locale.KOREA)
@@ -63,7 +65,7 @@ class DataInitializer(
 
     private fun initUsers() {
         logger.info { "initUsers 실행" }
-        val user1 = createUser(loginId = "test1", password = "test1")
+        val user1 = createUser(loginId = "test1", password = passwordEncoder.encode("test1"))
         val user2 = createUser(loginId = "test2")
         userRepository.saveAll(listOf(user1, user2))
         userRepository.flush()
@@ -76,19 +78,19 @@ class DataInitializer(
     ): TrainingSchedules {
         return TrainingSchedules(
             user = user,
-            title = faker.lorem().characters(100),
+            title = faker.lorem().characters(10, 100),
             location = faker.address().streetAddress(),
             scheduledDate = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
                 .toLocalDate(),
             color = faker.color().hex(),
-            description = faker.lorem().characters(100),
+            description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
         )
     }
 
     private fun createUser(
         loginId: String = faker.lorem().characters(30),
-        password: String = faker.internet().password(),
+        password: String = passwordEncoder.encode(faker.internet().password()),
         nickname: String = faker.funnyName().name(),
         gender: Gender = Gender.MALE,
         profileImage: String = faker.internet().image(640, 480),

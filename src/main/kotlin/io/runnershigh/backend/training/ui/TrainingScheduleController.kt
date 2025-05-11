@@ -29,7 +29,7 @@ class TrainingScheduleController(
 
     //    이번 주 훈련 일정 조회
     @GetMapping("/current-week")
-    fun getCurrentTrainingSchedule(): ResponseEntity<ApiResponse<List<ReadTrainingSchedule>>> {
+    fun getCurrentTrainingSchedules(): ResponseEntity<ApiResponse<List<ReadTrainingSchedule>>> {
         val result = trainingSchedulesUseCase.getCurrentWeekTrainingSchedules()
         return ResponseUtils.success(result, CommonResponseMessage.SUCCESS_GET_DATA.message)
     }

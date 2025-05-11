@@ -10,9 +10,16 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-// 추후 사용여부 확인 후 제거
+/*
+* 추후 사용여부 확인 후 제거
+*
+* 현재 로그인 프로세스가 회원 로그인 > api 호출 > 비즈니스 로직 (DB 조회) > JWT 생성
+* 따로 JWT 토큰에서 user name을 꺼내서 토큰 인증시 db조회 하지 않음, 토큰 유효성만 검증 하는중
+* 인증 요청마다 캐싱이나 DB 조회해서 필요할 경우 사용하도록 함
+* */
 
 //@Service
+@Deprecated(message = "사용여부 확인 후 제거")
 class CustomUserDetailsService(
 //    private val userRepository: UserRepository,
 )

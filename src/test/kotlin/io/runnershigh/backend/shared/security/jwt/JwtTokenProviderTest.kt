@@ -11,6 +11,10 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import java.util.Base64
 
+/*
+* TODO 로그인 api 개발시 함께 테스트 리팩토링 & BDD 형식으로 변경
+* */
+
 //class JwtTokenProviderTest {
 //    private lateinit var jwtTokenProvider: JwtTokenProvider
 //    private lateinit var userDetailsService: UserDetailsService

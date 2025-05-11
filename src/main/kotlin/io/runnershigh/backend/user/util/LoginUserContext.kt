@@ -8,6 +8,7 @@ import mu.KotlinLogging
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
+import kotlin.math.log
 
 @Component
 class LoginUserContext(
@@ -20,7 +21,7 @@ class LoginUserContext(
         try {
             return authentication.name?.toInt() ?: throw IllegalStateException("User not found")
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error(e) { "Failed to get current user ID: ${e.message}" }
             throw UserException(UserExceptionType.USER_NOT_FOUND)
         }
     }
