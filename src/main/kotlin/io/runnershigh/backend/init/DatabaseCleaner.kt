@@ -1,6 +1,7 @@
 package io.runnershigh.backend.init
 
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextClosedEvent
@@ -13,11 +14,19 @@ import javax.sql.DataSource
 @Profile("local")
 class DatabaseCleaner(
     private val dataSource: DataSource,
+
+    @Value("\${app.init.skip-data}")
+    private val skipDataInit: Boolean,
 ) : ApplicationListener<ContextClosedEvent> {
 
     private val logger = KotlinLogging.logger {}
 
     override fun onApplicationEvent(event: ContextClosedEvent) {
+        if (skipDataInit) {
+            logger.info { "Skip data 활성화 > 데이터 삭제 pass" }
+            return
+        }
+
         logger.info { " 서버 종료 중 .. DB 테이블 데이터 삭제" }
         truncateAllTables()
     }

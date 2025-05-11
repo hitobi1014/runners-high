@@ -10,6 +10,7 @@ import io.runnershigh.backend.user.infrastructure.entity.UserEntity
 import io.runnershigh.backend.user.infrastructure.repository.UserRepository
 import mu.KotlinLogging
 import net.datafaker.Faker
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
@@ -27,7 +28,11 @@ class DataInitializer(
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
     private val jwtTokenProvider: JwtTokenProvider,
     private val passwordEncoder: PasswordEncoder,
+
+    @Value("\${app.init.skip-data}")
+    private val skipDataInit: Boolean,
 ) : ApplicationRunner {
+
 
     private val faker = Faker(Locale.KOREA)
     private val zoneId = ZoneId.systemDefault()
@@ -35,6 +40,10 @@ class DataInitializer(
     private val logger = KotlinLogging.logger {}
 
     override fun run(args: ApplicationArguments?) {
+        if (skipDataInit) {
+            logger.info { "Skip Data 활성화, 기초 데이터 생성 pass" }
+            return
+        }
         initUsers()
         initTrainingSchedules()
         initToken()
