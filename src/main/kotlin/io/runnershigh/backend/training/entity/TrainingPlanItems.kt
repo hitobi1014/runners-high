@@ -1,8 +1,8 @@
-package io.runnershigh.backend.training.infrastructure.entity
+package io.runnershigh.backend.training.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
-import io.runnershigh.backend.training.domain.enum.DistanceUnit
-import io.runnershigh.backend.training.domain.enum.TargetType
+import io.runnershigh.backend.training.entity.enum.DistanceUnit
+import io.runnershigh.backend.training.entity.enum.TargetType
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
 import java.time.LocalTime

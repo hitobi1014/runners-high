@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.domain.enum
+package io.runnershigh.backend.training.entity.enum
 
 enum class TrainingStatus(val value: String) {
     PLANNED("계획완료"),
