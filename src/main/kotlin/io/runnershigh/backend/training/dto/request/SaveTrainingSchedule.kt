@@ -1,6 +1,6 @@
-package io.runnershigh.backend.training.ui.dto.request
+package io.runnershigh.backend.training.dto.request
 
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

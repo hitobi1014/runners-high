@@ -1,6 +1,6 @@
-package io.runnershigh.backend.training.ui.dto.response
+package io.runnershigh.backend.training.dto.response
 
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import java.time.LocalDate
 
 data class ReadTrainingSchedule(

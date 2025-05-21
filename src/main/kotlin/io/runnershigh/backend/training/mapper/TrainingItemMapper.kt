@@ -1,8 +1,8 @@
-package io.runnershigh.backend.training.domain.mapper
+package io.runnershigh.backend.training.mapper
 
-import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanItem
+import io.runnershigh.backend.training.entity.TrainingPlanItems
+import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.dto.request.SaveTrainingPlanItem
 
 fun SaveTrainingPlanItem.toEntity(schedule: TrainingSchedules) = TrainingPlanItems(
     schedule = schedule,
