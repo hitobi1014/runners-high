@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.infrastructure.entity
+package io.runnershigh.backend.training.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
 import jakarta.persistence.*

@@ -1,27 +1,26 @@
-package io.runnershigh.backend.training.infrastructure.repository.querydsl
+package io.runnershigh.backend.training.repository.querydsl
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
-import io.runnershigh.backend.training.infrastructure.entity.QTrainingSchedules.trainingSchedules
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.QTrainingSchedules.trainingSchedules
+import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Repository
-class TrainingScheduleQuerydsl(
+class TrainingScheduleRepositoryCustomImpl(
     private val queryFactory: JPAQueryFactory,
-) {
+) : TrainingScheduleRepositoryCustom {
 
-    fun findByUser(user: UserEntity): List<TrainingSchedules> {
+    override fun retrieveTrainingSchedules(user: UserEntity): List<TrainingSchedules> {
         return queryFactory.selectFrom(trainingSchedules)
             .where(eqUser(user))
             .orderBy(trainingSchedules.scheduledDate.desc())
             .fetch()
     }
 
-    fun findCurrentWeekSchedulesByUser(
+    override fun retrieveCurrentWeekSchedules(
         user: UserEntity,
         previousSunday: LocalDate,
         nextSaturday: LocalDate,
@@ -35,7 +34,7 @@ class TrainingScheduleQuerydsl(
             .fetch()
     }
 
-    fun findNextUpcomingScheduleByUser(user: UserEntity): TrainingSchedules? {
+    override fun retrieveNextUpcomingSchedule(user: UserEntity): TrainingSchedules? {
         return queryFactory.selectFrom(trainingSchedules)
             .where(
                 eqUser(user),

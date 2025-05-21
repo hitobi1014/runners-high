@@ -2,19 +2,23 @@ package io.runnershigh.backend.fixture
 
 import io.mockk.every
 import io.mockk.mockk
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.ui.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import net.datafaker.Faker
 import java.time.LocalDate
+import java.util.*
 
 object TrainingScheduleFixture {
+    private val faker = Faker(Locale.KOREA)
+
     fun createDefault(
         id: Long = 0,
         user: UserEntity = UserFixture.createDefault(),
-        title: String = "하프마라톤 대비",
-        location: String = "보라매 공원",
-        description: String = "보라매 공원 가볍게 러닝",
+        title: String = faker.lorem().characters(5, 20),
+        location: String = faker.location().publicSpace(),
+        description: String = faker.lorem().sentence(30),
         scheduledDate: LocalDate = LocalDate.now(),
         status: TrainingStatus = TrainingStatus.PLANNED,
         color: String = "#B5EAD7",
@@ -31,12 +35,21 @@ object TrainingScheduleFixture {
         )
     }
 
+    fun createTrainingScheduleList(count: Int, user: UserEntity): List<TrainingSchedules> {
+        return (1..count).map {
+            createDefault(
+                user = user,
+                scheduledDate = LocalDate.now().plusDays(it.toLong() - 1),
+            )
+        }
+    }
+
     fun createReadTrainingSchedule(
         id: Long = 0,
-        title: String = "훈련1",
-        location: String = "여의도 공원",
+        title: String = faker.lorem().characters(5, 15),
+        location: String = faker.location().publicSpace(),
         scheduledDate: LocalDate = LocalDate.now(),
-        description: String = "고구마 캐기",
+        description: String = faker.lorem().sentence(30),
         status: TrainingStatus = TrainingStatus.PLANNED,
         color: String = "#B5EAD7",
     ): ReadTrainingSchedule {
