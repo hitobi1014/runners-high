@@ -1,17 +1,17 @@
-package io.runnershigh.backend.training.application.command
+package io.runnershigh.backend.training.service
 
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.TrainingScheduleFixture
-import io.runnershigh.backend.training.domain.enum.DistanceUnit
-import io.runnershigh.backend.training.domain.enum.TargetType
-import io.runnershigh.backend.training.domain.mapper.toEntity
-import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanItems
-import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanItemsRepository
-import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanItem
+import io.runnershigh.backend.training.entity.enum.DistanceUnit
+import io.runnershigh.backend.training.entity.enum.TargetType
+import io.runnershigh.backend.training.mapper.toEntity
+import io.runnershigh.backend.training.entity.TrainingPlanItems
+import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
+import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.training.dto.request.SaveTrainingPlanItem
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -21,7 +21,7 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalTime
 
 @ExtendWith(MockKExtension::class)
-class TrainingPlanItemsUseCaseTest {
+class TrainingPlanItemsServiceImplTest {
 
     @MockK
     private lateinit var planItemsRepository: TrainingPlanItemsRepository
@@ -29,11 +29,11 @@ class TrainingPlanItemsUseCaseTest {
     @MockK
     private lateinit var scheduleRepository: TrainingSchedulesRepository
 
-    private lateinit var useCase: TrainingPlanItemsUseCase
+    private lateinit var useCase: TrainingPlanItemsServiceImpl
 
     @BeforeEach
     fun setup() {
-        useCase = TrainingPlanItemsUseCase(planItemsRepository, scheduleRepository)
+        useCase = TrainingPlanItemsServiceImpl(planItemsRepository, scheduleRepository)
     }
 
     @Test

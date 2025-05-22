@@ -1,24 +1,24 @@
-package io.runnershigh.backend.training.application
+package io.runnershigh.backend.training.service
 
-import io.runnershigh.backend.training.domain.mapper.toEntity
+import io.runnershigh.backend.training.dto.request.SaveTrainingPlanGroup
+import io.runnershigh.backend.training.entity.TrainingPlanGroups
+import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
-import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanGroups
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanGroupRepository
-import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanGroup
+import io.runnershigh.backend.training.mapper.toEntity
+import io.runnershigh.backend.training.repository.TrainingPlanGroupRepository
+import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+
 @Service
 @Transactional
-class TrainingPlanGroupUseCase(
+class TrainingPlanGroupServiceImpl(
     private val trainingPlanGroupRepository: TrainingPlanGroupRepository,
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
-) {
-
+) : TrainingPlanGroupService {
 
     /**
      * 주어진 `SaveTrainingPlanGroup` DTO와 `scheduleId`를 기반으로 새로운 훈련 계획 그룹을 생성합니다.
@@ -30,7 +30,10 @@ class TrainingPlanGroupUseCase(
      *
      * @throws TrainingException 주어진 `scheduleId`에 해당하는 훈련 일정이 존재하지 않을 경우 예외를 발생시킵니다.
      */
-    fun createTrainingPlanGroup(dto: SaveTrainingPlanGroup, scheduleId: Long): TrainingPlanGroups {
+    override fun createTrainingPlanGroup(
+        dto: SaveTrainingPlanGroup,
+        scheduleId: Long,
+    ): TrainingPlanGroups {
         val scheduleEntity = getTrainingSchedule(scheduleId)
         val trainingPlanGroupEntity = dto.toEntity(scheduleEntity)
 

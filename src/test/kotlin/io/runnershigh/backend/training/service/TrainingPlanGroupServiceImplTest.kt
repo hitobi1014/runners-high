@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.application
+package io.runnershigh.backend.training.service
 
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -6,13 +6,13 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.TrainingScheduleFixture
-import io.runnershigh.backend.training.domain.mapper.toEntity
+import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
-import io.runnershigh.backend.training.infrastructure.entity.TrainingPlanGroups
-import io.runnershigh.backend.training.infrastructure.repository.TrainingPlanGroupRepository
-import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.ui.dto.request.SaveTrainingPlanGroup
+import io.runnershigh.backend.training.entity.TrainingPlanGroups
+import io.runnershigh.backend.training.repository.TrainingPlanGroupRepository
+import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.training.dto.request.SaveTrainingPlanGroup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.repository.findByIdOrNull
 
 @ExtendWith(MockKExtension::class)
-class TrainingPlanGroupUseCaseTest {
+class TrainingPlanGroupServiceImplTest {
 
     @MockK
     private lateinit var trainingPlanGroupRepository: TrainingPlanGroupRepository
@@ -31,11 +31,12 @@ class TrainingPlanGroupUseCaseTest {
     @MockK
     private lateinit var trainingSchedulesRepository: TrainingSchedulesRepository
 
-    private lateinit var useCase: TrainingPlanGroupUseCase
+    private lateinit var useCase: TrainingPlanGroupServiceImpl
 
     @BeforeEach
     fun setup() {
-        useCase = TrainingPlanGroupUseCase(trainingPlanGroupRepository, trainingSchedulesRepository)
+        useCase =
+            TrainingPlanGroupServiceImpl(trainingPlanGroupRepository, trainingSchedulesRepository)
     }
 
     @Test
