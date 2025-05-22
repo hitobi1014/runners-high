@@ -4,13 +4,17 @@ import io.runnershigh.backend.user.domain.enum.AgeGroup
 import io.runnershigh.backend.user.domain.enum.Gender
 import io.runnershigh.backend.user.domain.enum.UserStatus
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import net.datafaker.Faker
+import java.util.*
 
 object UserFixture {
+    private val faker = Faker(Locale.KOREA)
+
     fun createDefault(
         id: Int = 0,
-        loginId: String = "test1234",
-        password: String = "pw1234",
-        nickname: String = "테스트유저",
+        loginId: String = faker.internet().uuid(),
+        password: String = faker.internet().password(),
+        nickname: String = faker.funnyName().name(),
         gender: Gender = Gender.MALE,
         profileImage: String = "",
         ageGroup: AgeGroup = AgeGroup.TWENTIES,

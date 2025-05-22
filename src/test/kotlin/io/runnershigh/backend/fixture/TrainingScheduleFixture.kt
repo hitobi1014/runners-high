@@ -66,12 +66,14 @@ object TrainingScheduleFixture {
 
     fun createEntityMock(
         id: Long,
+        user: UserEntity,
         scheduledDate: LocalDate,
         status: TrainingStatus = TrainingStatus.PLANNED,
     ): TrainingSchedules {
         val dto = createReadTrainingSchedule(id, scheduledDate = scheduledDate, status = status)
 
         return mockk<TrainingSchedules>().apply {
+            every { this@apply.user } returns user
             every { this@apply.id } returns id
             every { this@apply.scheduledDate } returns scheduledDate
             every { this@apply.status } returns status
@@ -82,10 +84,11 @@ object TrainingScheduleFixture {
         }
     }
 
-    fun createMultipleEntityMocks(count: Int): List<TrainingSchedules> {
+    fun createMultipleEntityMocks(count: Int, user: UserEntity): List<TrainingSchedules> {
         return (1..count).map { index ->
             createEntityMock(
-                index.toLong(),
+                id = index.toLong(),
+                user = user,
                 scheduledDate = LocalDate.now().plusDays(index.toLong() - 1)
             )
         }
