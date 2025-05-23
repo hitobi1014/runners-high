@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.ui
+package io.runnershigh.backend.training.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
@@ -6,9 +6,9 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.shared.response.CommonResponseMessage
-import io.runnershigh.backend.training.application.TrainingSchedulesUseCase
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
-import io.runnershigh.backend.training.ui.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
@@ -29,7 +29,7 @@ import java.time.LocalDate
 @AutoConfigureMockMvc(addFilters = false)
 class TrainingScheduleControllerTest(
     @Autowired private val mockMvc: MockMvc,
-    @MockkBean private val trainingScheduleUseCase: TrainingSchedulesUseCase,
+    @MockkBean private val trainingScheduleUseCase: TrainingSchedulesServiceImpl,
 ) : BehaviorSpec({
 
     val baseUrl = "/api/training-schedule"
