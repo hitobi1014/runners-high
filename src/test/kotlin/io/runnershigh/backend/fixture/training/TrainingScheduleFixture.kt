@@ -1,7 +1,8 @@
-package io.runnershigh.backend.fixture
+package io.runnershigh.backend.fixture.training
 
 import io.mockk.every
 import io.mockk.mockk
+import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule

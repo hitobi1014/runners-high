@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.runnershigh.backend.fixture.TrainingScheduleFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.training.dto.request.SaveTrainingPlanGroup
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.exception.TrainingException

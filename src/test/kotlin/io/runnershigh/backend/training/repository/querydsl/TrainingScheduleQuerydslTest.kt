@@ -3,7 +3,7 @@ package io.runnershigh.backend.training.repository.querydsl
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.runnershigh.backend.fixture.TrainingScheduleFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.annotation.QuerydslTest
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository

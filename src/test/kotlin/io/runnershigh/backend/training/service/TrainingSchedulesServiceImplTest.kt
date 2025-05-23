@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.service.command
+package io.runnershigh.backend.training.service
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -11,7 +11,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.runnershigh.backend.fixture.TrainingScheduleFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.util.DateUtils
 import io.runnershigh.backend.training.dto.request.SaveTrainingSchedule
@@ -22,8 +22,6 @@ import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.service.TrainingSchedulesService
-import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
