@@ -1,9 +1,9 @@
 package io.runnershigh.backend.init
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.domain.enum.AgeGroup
 import io.runnershigh.backend.user.domain.enum.Gender
 import io.runnershigh.backend.user.infrastructure.entity.UserEntity
