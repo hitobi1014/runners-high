@@ -1,90 +1,35 @@
 package io.runnershigh.backend.training.service
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.TrainingScheduleFixture
-import io.runnershigh.backend.training.mapper.toEntity
+import io.runnershigh.backend.training.dto.request.SaveTrainingPlanGroup
+import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
-import io.runnershigh.backend.training.entity.TrainingPlanGroups
+import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.repository.TrainingPlanGroupRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.training.dto.request.SaveTrainingPlanGroup
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.repository.findByIdOrNull
 
 @ExtendWith(MockKExtension::class)
-class TrainingPlanGroupServiceImplTest {
+class TrainingPlanGroupServiceImplTest : BehaviorSpec() {
+    @MockK
+    private lateinit var planGroupRepository: TrainingPlanGroupRepository
 
     @MockK
-    private lateinit var trainingPlanGroupRepository: TrainingPlanGroupRepository
+    private lateinit var schedulesRepository: TrainingSchedulesRepository
 
-    @MockK
-    private lateinit var trainingSchedulesRepository: TrainingSchedulesRepository
-
-    private lateinit var useCase: TrainingPlanGroupServiceImpl
-
-    @BeforeEach
-    fun setup() {
-        useCase =
-            TrainingPlanGroupServiceImpl(trainingPlanGroupRepository, trainingSchedulesRepository)
-    }
-
-    @Test
-    @DisplayName("훈련 그룹을 정상으로 저장한다.")
-    fun createTrainingPlanGroup() {
-        //given
-        val scheduleId: Long = 1
-        val scheduleEntity = TrainingScheduleFixture.createDefault(id = scheduleId)
-        val dto = getSaveTrainingPlanGroupDto()
-        val trainingGroupEntity = dto.toEntity(scheduleEntity)
-
-        //when
-        every { trainingSchedulesRepository.findByIdOrNull(ofType<Long>()) } returns scheduleEntity
-        every { trainingPlanGroupRepository.save(ofType<TrainingPlanGroups>()) } returns trainingGroupEntity
-
-        val result = useCase.createTrainingPlanGroup(dto, scheduleId)
-
-        //then
-        assertNotNull(result)
-        assertEquals(trainingGroupEntity.groupOrder, result.groupOrder)
-        assertEquals(trainingGroupEntity.repeatCount, result.repeatCount)
-
-        verify(exactly = 1) { trainingSchedulesRepository.findByIdOrNull(ofType<Long>()) }
-        verify(exactly = 1) { trainingPlanGroupRepository.save(ofType<TrainingPlanGroups>()) }
-
-        // 모든 Mock 호출 확인
-        confirmVerified(trainingSchedulesRepository, trainingPlanGroupRepository)
-    }
-
-    @Test
-    @DisplayName("훈련 그룹 저장 - 훈련일정 못찾는 경우 예외 발생")
-    fun createTrainingPlanGroup_withInvalidScheduleId() {
-        //given
-        val scheduleId: Long = 1
-        val dto = getSaveTrainingPlanGroupDto()
-
-        every { trainingSchedulesRepository.findByIdOrNull(ofType<Long>()) } returns null
-
-        //when
-        val exception = assertThrows<TrainingException> {
-            useCase.createTrainingPlanGroup(dto, scheduleId)
-        }
-
-        //then
-        assertEquals(TrainingExceptionType.CANNOT_FOUND_TRAINING_SCHEDULE, exception.exceptionType)
-        verify(exactly = 1) { trainingSchedulesRepository.findByIdOrNull(ofType<Long>()) }
-        confirmVerified(trainingSchedulesRepository)
-    }
+    private lateinit var trainingPlanGroupService: TrainingPlanGroupServiceImpl
 
     private fun getSaveTrainingPlanGroupDto(): SaveTrainingPlanGroup = SaveTrainingPlanGroup(
         groupOrder = 1,
@@ -92,5 +37,62 @@ class TrainingPlanGroupServiceImplTest {
         description = "템포런"
     )
 
+    init {
+        beforeSpec {
+            trainingPlanGroupService =
+                TrainingPlanGroupServiceImpl(planGroupRepository, schedulesRepository)
+        }
+
+        afterTest {
+            clearMocks(planGroupRepository, schedulesRepository)
+            trainingPlanGroupService =
+                TrainingPlanGroupServiceImpl(planGroupRepository, schedulesRepository)
+        }
+
+        Given("훈련 그룹 정보를 정상적으로 입력하고") {
+            val scheduleId: Long = 1
+            val scheduleEntity = TrainingScheduleFixture.createDefault(id = scheduleId)
+            val dto = getSaveTrainingPlanGroupDto()
+            val trainingGroupEntity = dto.toEntity(scheduleEntity)
+
+            every { schedulesRepository.findByIdOrNull(ofType<Long>()) } returns scheduleEntity
+            every { planGroupRepository.save(ofType<TrainingPlanGroups>()) } returns trainingGroupEntity
+
+            When("그룹 생성을 수행하면") {
+                val result = trainingPlanGroupService.createTrainingPlanGroup(dto, scheduleId)
+
+                Then("그룹이 생성된다.") {
+                    result shouldNotBe null
+                    result.groupOrder shouldBe trainingGroupEntity.groupOrder
+                    result.repeatCount shouldBe trainingGroupEntity.repeatCount
+
+                    verify(exactly = 1) { schedulesRepository.findByIdOrNull(ofType<Long>()) }
+                    verify(exactly = 1) { planGroupRepository.save(ofType<TrainingPlanGroups>()) }
+
+                    confirmVerified(schedulesRepository, planGroupRepository)
+                }
+            }
+        }
+
+        Given("훈련 그룹 정보를 입력학고") {
+            val scheduleId: Long = 1
+            val dto = getSaveTrainingPlanGroupDto()
+
+            every { schedulesRepository.findByIdOrNull(ofType<Long>()) } returns null
+
+            When("생성을 하기 위해 훈련정보를 일정ID로 찾았을때 값이 훈련 일정이 없으면") {
+                Then("예외가 발생한다.") {
+                    shouldThrow<TrainingException> {
+                        trainingPlanGroupService.createTrainingPlanGroup(dto, scheduleId)
+                    }.run {
+                        exceptionType shouldBe TrainingExceptionType.CANNOT_FOUND_TRAINING_SCHEDULE
+                        message shouldBe "해당 정보로 등록된 훈련 일정을 찾을 수 없습니다."
+                    }
+                    verify(exactly = 1) { schedulesRepository.findByIdOrNull(ofType<Long>()) }
+                    confirmVerified(schedulesRepository)
+                }
+            }
+        }
+    }
 
 }
