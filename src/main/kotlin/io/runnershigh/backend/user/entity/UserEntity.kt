@@ -1,9 +1,9 @@
-package io.runnershigh.backend.user.infrastructure.entity
+package io.runnershigh.backend.user.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
-import io.runnershigh.backend.user.domain.enum.AgeGroup
-import io.runnershigh.backend.user.domain.enum.Gender
-import io.runnershigh.backend.user.domain.enum.UserStatus
+import io.runnershigh.backend.user.entity.enum.AgeGroup
+import io.runnershigh.backend.user.entity.enum.Gender
+import io.runnershigh.backend.user.entity.enum.UserStatus
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
 

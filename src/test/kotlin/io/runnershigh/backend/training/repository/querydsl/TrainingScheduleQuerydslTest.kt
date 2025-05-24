@@ -7,7 +7,7 @@ import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.annotation.QuerydslTest
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import java.time.LocalDate

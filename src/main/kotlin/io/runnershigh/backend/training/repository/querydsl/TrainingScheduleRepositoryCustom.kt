@@ -1,7 +1,7 @@
 package io.runnershigh.backend.training.repository.querydsl
 
 import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import io.runnershigh.backend.user.entity.UserEntity
 import java.time.LocalDate
 
 interface TrainingScheduleRepositoryCustom {

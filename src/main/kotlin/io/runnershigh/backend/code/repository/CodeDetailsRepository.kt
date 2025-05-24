@@ -1,4 +1,4 @@
-package io.runnershigh.backend.code.infrastructure.repository
+package io.runnershigh.backend.code.repository
 
 import io.runnershigh.backend.code.entity.CodeDetails
 import org.springframework.data.jpa.repository.JpaRepository

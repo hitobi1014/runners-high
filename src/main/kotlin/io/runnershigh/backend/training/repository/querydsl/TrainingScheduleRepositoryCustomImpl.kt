@@ -4,7 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import io.runnershigh.backend.training.entity.QTrainingSchedules.trainingSchedules
 import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 

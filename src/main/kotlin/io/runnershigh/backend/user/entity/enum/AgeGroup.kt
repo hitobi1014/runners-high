@@ -1,4 +1,4 @@
-package io.runnershigh.backend.user.domain.enum
+package io.runnershigh.backend.user.entity.enum
 
 enum class AgeGroup(val displayName: String) {
     TEENS("10대"),

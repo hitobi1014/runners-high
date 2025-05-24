@@ -1,4 +1,4 @@
-package io.runnershigh.backend.user.domain.enum
+package io.runnershigh.backend.user.entity.enum
 
 enum class Gender {
     MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY;

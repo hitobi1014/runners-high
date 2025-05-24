@@ -6,7 +6,7 @@ import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import io.runnershigh.backend.user.entity.UserEntity
 import net.datafaker.Faker
 import java.time.LocalDate
 import java.util.*

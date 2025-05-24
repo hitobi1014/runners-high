@@ -4,12 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
-import io.runnershigh.backend.user.domain.enum.AgeGroup
-import io.runnershigh.backend.user.domain.enum.Gender
+import io.runnershigh.backend.user.entity.UserEntity
+import io.runnershigh.backend.user.entity.enum.AgeGroup
+import io.runnershigh.backend.user.entity.enum.Gender
 import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.infrastructure.repository.UserRepository
+import io.runnershigh.backend.user.repository.UserRepository
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

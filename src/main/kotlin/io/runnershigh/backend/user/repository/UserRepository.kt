@@ -1,6 +1,6 @@
-package io.runnershigh.backend.user.infrastructure.repository
+package io.runnershigh.backend.user.repository
 
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
+import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRepository : JpaRepository<UserEntity, Int> {
