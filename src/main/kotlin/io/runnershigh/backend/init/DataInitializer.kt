@@ -1,13 +1,13 @@
 package io.runnershigh.backend.init
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
-import io.runnershigh.backend.training.domain.enum.TrainingStatus
-import io.runnershigh.backend.training.infrastructure.entity.TrainingSchedules
-import io.runnershigh.backend.training.infrastructure.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.user.domain.enum.AgeGroup
-import io.runnershigh.backend.user.domain.enum.Gender
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.infrastructure.repository.UserRepository
+import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.user.entity.UserEntity
+import io.runnershigh.backend.user.entity.enum.AgeGroup
+import io.runnershigh.backend.user.entity.enum.Gender
+import io.runnershigh.backend.user.repository.UserRepository
 import mu.KotlinLogging
 import net.datafaker.Faker
 import org.springframework.beans.factory.annotation.Value
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.Locale
+import java.util.*
 
 @Component
 @Profile("local")

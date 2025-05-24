@@ -1,14 +1,13 @@
 package io.runnershigh.backend.user.util
 
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
-import io.runnershigh.backend.user.infrastructure.entity.UserEntity
-import io.runnershigh.backend.user.infrastructure.repository.UserRepository
+import io.runnershigh.backend.user.repository.UserRepository
 import mu.KotlinLogging
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import kotlin.math.log
 
 @Component
 class LoginUserContext(

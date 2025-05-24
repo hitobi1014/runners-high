@@ -1,15 +1,5 @@
 package io.runnershigh.backend.shared.security
 
-import io.runnershigh.backend.user.domain.enum.UserStatus
-import io.runnershigh.backend.user.infrastructure.repository.UserRepository
-import org.springframework.data.repository.findByIdOrNull
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-
 /*
 * 추후 사용여부 확인 후 제거
 *
