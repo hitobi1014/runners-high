@@ -115,7 +115,8 @@ class JwtTokenProvider(
                 .parseClaimsJws(token)
 
             return !claims.body.expiration.before(Date())
-        } catch (e: Exception) {
+        } catch (e: Exception) { // TODO 세부 예외처리 필요
+            e.printStackTrace()
             return false
         }
     }
