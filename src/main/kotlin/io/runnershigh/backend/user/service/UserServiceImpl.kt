@@ -16,13 +16,19 @@ class UserServiceImpl(
     private val jwtTokenProvider: JwtTokenProvider,
 ) : UserService {
 
-    override fun login(loginDto: LoginRequest): LoginResponse {
+    private val logger = mu.KotlinLogging.logger {}
+
+    override fun login(request: LoginRequest): LoginResponse {
         // 1. DB에서 유저 정보 조회
-        val user = (userRepository.findByLoginId(loginDto.loginId)
-            ?: throw UserException(UserExceptionType.USER_INVALID_CREDENTIALS))
+        val user = (userRepository.findByLoginId(request.loginId)
+//            ?: throw UserException(UserExceptionType.USER_INVALID_CREDENTIALS))
+            ?: run {
+                logger.warn { "유저가 존재하지 않음: ${request.loginId} not found" }
+                throw UserException(UserExceptionType.USER_INVALID_CREDENTIALS)
+            })
 
         // 2. 패스워드 검증
-        if (!passwordEncoder.matches(loginDto.password, user.password)) {
+        if (!passwordEncoder.matches(request.password, user.password)) {
             throw UserException(UserExceptionType.USER_INVALID_CREDENTIALS)
         }
 

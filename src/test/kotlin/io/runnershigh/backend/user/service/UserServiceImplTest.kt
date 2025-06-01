@@ -43,7 +43,6 @@ class UserServiceImplTest : BehaviorSpec() {
         }
         afterTest {
             clearMocks(userRepository, passwordEncoder, jwtTokenProvider)
-            userService = UserServiceImpl(userRepository, passwordEncoder, jwtTokenProvider)
         }
 
         given("로그인 요청이 들어왔을 때") {
