@@ -53,7 +53,7 @@ class DataInitializer(
     private fun initToken() {
         val user =
             userRepository.findByLoginId("test1") ?: throw IllegalStateException("User not found")
-        val token = jwtTokenProvider.generateToken(user.id, user.nickname)
+        val token = jwtTokenProvider.generateAccessToken(user.id, user.nickname)
         logger.info { "#유저 토큰 정보 test1 : $token" }
     }
 

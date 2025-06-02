@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 import java.util.Date
 import javax.crypto.SecretKey
@@ -21,8 +20,13 @@ class JwtTokenProvider(
     private val secretString: String,
 
     @Value("\${jwt.access-token-expire-time}")
-    private val tokenExpireSeconds: Long,
+    private val accessTokenExpire: Long,
+
+    @Value("\${jwt.refresh-token-expire-time}")
+    private val refreshTokenExpire: Long,
 ) {
+
+    private val logger = mu.KotlinLogging.logger {}
 
     private val secretKey: SecretKey by lazy {
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString))
@@ -37,13 +41,28 @@ class JwtTokenProvider(
      * @param nickname 사용자의 닉네임
      * @return 생성된 JWT 토큰 문자열
      */
-    fun generateToken(userId: Int, nickname: String): String {
+    fun generateAccessToken(userId: Int, nickname: String): String {
         val claims = Jwts.claims().setSubject(userId.toString())
         claims["nickname"] = nickname
         claims["role"] = "ROLE_USER"
 
         val now = Date()
-        val expiredTime = Date(now.time + tokenExpireSeconds * 1000)
+        val expiredTime = Date(now.time + accessTokenExpire * 1000)
+
+        return Jwts.builder()
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(expiredTime)
+            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .compact()
+    }
+
+    fun generateRefreshToken(userId: Int): String {
+        val claims = Jwts.claims().setSubject(userId.toString())
+        claims["tokenType"] = "REFRESH"
+
+        val now = Date()
+        val expiredTime = Date(now.time + refreshTokenExpire * 1000)
 
         return Jwts.builder()
             .setClaims(claims)
@@ -98,7 +117,17 @@ class JwtTokenProvider(
                 .parseClaimsJws(token)
 
             return !claims.body.expiration.before(Date())
+        } catch (e: io.jsonwebtoken.ExpiredJwtException) {
+            logger.debug("Token expired: ${e.message}")
+            return false
+        } catch (e: io.jsonwebtoken.UnsupportedJwtException) {
+            logger.warn("Unsupported JWT token: ${e.message}")
+            return false
+        } catch (e: io.jsonwebtoken.MalformedJwtException) {
+            logger.warn("Malformed JWT token: ${e.message}")
+            return false
         } catch (e: Exception) {
+            logger.error("Unexpected error validating JWT token", e)
             return false
         }
     }
