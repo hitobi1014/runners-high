@@ -5,6 +5,7 @@ import io.runnershigh.backend.shared.response.ResponseUtils
 import io.runnershigh.backend.user.dto.request.LoginRequest
 import io.runnershigh.backend.user.dto.response.LoginResponse
 import io.runnershigh.backend.user.service.UserService
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,7 +21,7 @@ class AuthController(
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("/login")
-    fun userLogin(@RequestBody request: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
+    fun userLogin(@RequestBody @Valid request: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
         val response = userService.login(request)
         logger.info { "로그인 성공, 유저 ID: ${response.userId}" }
         return ResponseUtils.success(response, "로그인 성공")

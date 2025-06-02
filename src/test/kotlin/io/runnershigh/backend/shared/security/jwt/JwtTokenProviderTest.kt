@@ -67,11 +67,8 @@ class JwtTokenProviderTest : BehaviorSpec() {
         }
 
         Given("만료된 토큰이 주어진 경우") {
-            val expiredJWTProvider = initJwtTokenProvider(accessTokenExpire = -1)
+            val expiredJWTProvider = initJwtTokenProvider(accessTokenExpire = 0)
             val expiredToken = expiredJWTProvider.generateAccessToken(userId, nickname)
-            println(expiredToken)
-
-            Thread.sleep(1000) // 확실하게 만료되기 위해 잠시 대기
 
             When("토큰 유효성 검증을 하면") {
                 Then("예외가 발생한다.") {

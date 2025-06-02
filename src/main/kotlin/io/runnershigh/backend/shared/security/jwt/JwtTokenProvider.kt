@@ -26,6 +26,8 @@ class JwtTokenProvider(
     private val refreshTokenExpire: Long,
 ) {
 
+    private val logger = mu.KotlinLogging.logger {}
+
     private val secretKey: SecretKey by lazy {
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString))
     }
@@ -115,8 +117,17 @@ class JwtTokenProvider(
                 .parseClaimsJws(token)
 
             return !claims.body.expiration.before(Date())
-        } catch (e: Exception) { // TODO 세부 예외처리 필요
-            e.printStackTrace()
+        } catch (e: io.jsonwebtoken.ExpiredJwtException) {
+            logger.debug("Token expired: ${e.message}")
+            return false
+        } catch (e: io.jsonwebtoken.UnsupportedJwtException) {
+            logger.warn("Unsupported JWT token: ${e.message}")
+            return false
+        } catch (e: io.jsonwebtoken.MalformedJwtException) {
+            logger.warn("Malformed JWT token: ${e.message}")
+            return false
+        } catch (e: Exception) {
+            logger.error("Unexpected error validating JWT token", e)
             return false
         }
     }
