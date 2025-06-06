@@ -18,11 +18,11 @@ class UserEntity(
     @Comment("로그인 ID")
     val loginId: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Comment("비밀번호")
     var password: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20, unique = true)
     @Comment("닉네임")
     var nickname: String,
 
@@ -31,7 +31,7 @@ class UserEntity(
     var gender: Gender,
 
     @Comment("프로필")
-    var profileImage: String,
+    var profileImage: String? = "",
 
     @Comment("연령대")
     var ageGroup: AgeGroup,
