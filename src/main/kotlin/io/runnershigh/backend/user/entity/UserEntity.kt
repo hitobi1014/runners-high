@@ -18,7 +18,7 @@ class UserEntity(
     @Comment("로그인 ID")
     val loginId: String,
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     @Comment("비밀번호")
     var password: String,
 
