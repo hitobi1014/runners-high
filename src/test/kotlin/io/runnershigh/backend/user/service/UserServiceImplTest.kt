@@ -151,6 +151,10 @@ class UserServiceImplTest : BehaviorSpec() {
                 then("USER_NICKNAME_ALREADY_EXISTS 예외가 발생한다.") {
                     shouldThrow<UserException> { userService.signup(request) }
                         .run { exceptionType shouldBe UserExceptionType.USER_NICKNAME_ALREADY_EXISTS }
+                    verify(exactly = 1) { userRepository.existsByLoginId(request.loginId) }
+                    verify(exactly = 1) { userRepository.existsByNickname(request.nickname) }
+                    verify(exactly = 0) { passwordEncoder.encode(any()) }
+                    verify(exactly = 0) { userRepository.save(any<UserEntity>()) }
                 }
             }
         }

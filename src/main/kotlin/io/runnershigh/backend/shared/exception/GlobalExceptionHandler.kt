@@ -84,8 +84,7 @@ class GlobalExceptionHandler {
                 ApiResponse.error<Nothing>(
                     status = HttpStatus.BAD_REQUEST,
                     code = ErrorCodes.VALIDATION_ERROR.errorCode,
-                    message = "검증 오류 발생: $errorMessage".takeIf { errorMessage.isNotEmpty() }
-                        ?: "검증 오류가 발생했습니다."
+                    message = if (errorMessage.isBlank()) "검증 오류가 발생했습니다." else "검증 오류 발생: $errorMessage"
                 )
             )
     }

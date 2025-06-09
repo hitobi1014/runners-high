@@ -14,6 +14,7 @@ data class SignupRequest(
     @field:Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해야 합니다.")
     val password: String,
 
+    @field:NotBlank(message = "닉네임은 필수입니다.")
     @field:Size(min = 1, max = 20, message = "닉네임은 1자 이상 20자 이하로 입력해야 합니다.")
     val nickname: String,
     val gender: Gender,

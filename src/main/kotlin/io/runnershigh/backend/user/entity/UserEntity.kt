@@ -31,7 +31,7 @@ class UserEntity(
     var gender: Gender,
 
     @Comment("프로필")
-    var profileImage: String? = "",
+    var profileImage: String? = null,
 
     @Comment("연령대")
     var ageGroup: AgeGroup,

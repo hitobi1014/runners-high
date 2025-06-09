@@ -33,13 +33,29 @@ class UserRepositoryCustomImplTest : BehaviorSpec() {
             }
         }
 
+        given("등록되지 않은 로그인 ID가 있을 때") {
+            `when`("로그인ID 중복검사를 진행하면") {
+                val loginId = "test2"
+                then("중복된 로그인 ID가 존재하지 않으면 false를 반환한다.") {
+                    userRepository.existsByLoginId(loginId) shouldBe false
+                }
+            }
+        }
+
         given("이미 등록된 닉네임이 있을 때") {
             `when`("닉네임 중복검사를 진행하면") {
-                val user = userRepository.findByLoginId("test1")
-                println("유저ID: ${user?.loginId}, 유저닉네임: ${user?.nickname}")
                 val nickname = "테스트1"
                 then("중복된 닉네임이 존재하면 true를 반환한다.") {
                     userRepository.existsByNickname(nickname) shouldBe true
+                }
+            }
+        }
+
+        given("등록되지 않은 닉네임이 있을 때") {
+            `when`("닉네임 중복검사를 진행하면") {
+                val nickname = "테스트2"
+                then("중복된 닉네임이 존재하지 않으면 false를 반환한다.") {
+                    userRepository.existsByNickname(nickname) shouldBe false
                 }
             }
         }
