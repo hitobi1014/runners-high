@@ -11,16 +11,18 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
-import io.runnershigh.backend.training.service.TrainingPlanItemsServiceImpl
 import io.runnershigh.backend.user.dto.request.LoginRequest
+import io.runnershigh.backend.user.dto.request.SignupRequest
 import io.runnershigh.backend.user.entity.UserEntity
+import io.runnershigh.backend.user.entity.enum.AgeGroup
+import io.runnershigh.backend.user.entity.enum.Gender
 import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
 import io.runnershigh.backend.user.repository.UserRepository
 import net.datafaker.Faker
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.util.Locale
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class UserServiceImplTest : BehaviorSpec() {
@@ -107,6 +109,71 @@ class UserServiceImplTest : BehaviorSpec() {
                     verify(exactly = 0) { jwtTokenProvider.generateRefreshToken(any()) }
                 }
             }
+        }
+
+        given("회원가입을 요청했을 때") {
+            val loginId = "test99"
+            val request = SignupRequest(
+                loginId = loginId,
+                password = faker.internet().password(),
+                nickname = faker.funnyName().name(),
+                gender = Gender.MALE,
+                ageGroup = AgeGroup.TWENTIES
+            )
+
+            `when`("회원가입이 가능하면") {
+                every { userRepository.existsByLoginId(request.loginId) } returns false
+                every { userRepository.existsByNickname(request.nickname) } returns false
+                every { passwordEncoder.encode(request.password) } returns request.password
+                every { userRepository.save(any<UserEntity>()) } answers { firstArg() }
+
+                then("회원가입을 성공한다.") {
+                    val savedUserLoginId = userService.signup(request)
+                    savedUserLoginId shouldBe loginId
+                    verify(exactly = 1) { userRepository.existsByLoginId(request.loginId) }
+                    verify(exactly = 1) { userRepository.existsByNickname(request.nickname) }
+                    verify(exactly = 1) { passwordEncoder.encode(request.password) }
+                    verify(exactly = 1) { userRepository.save(any<UserEntity>()) }
+                }
+            }
+
+            `when`("로그인ID가 중복되면") {
+                every { userRepository.existsByLoginId(request.loginId) } returns true
+                then("USER_LOGIN_ID_ALREADY_EXISTS 예외가 발생한다.") {
+                    shouldThrow<UserException> { userService.signup(request) }
+                        .run { exceptionType shouldBe UserExceptionType.USER_LOGIN_ID_ALREADY_EXISTS }
+                }
+            }
+
+            `when`("닉네임이 중복되면") {
+                every { userRepository.existsByLoginId(request.loginId) } returns false
+                every { userRepository.existsByNickname(request.nickname) } returns true
+                then("USER_NICKNAME_ALREADY_EXISTS 예외가 발생한다.") {
+                    shouldThrow<UserException> { userService.signup(request) }
+                        .run { exceptionType shouldBe UserExceptionType.USER_NICKNAME_ALREADY_EXISTS }
+                    verify(exactly = 1) { userRepository.existsByLoginId(request.loginId) }
+                    verify(exactly = 1) { userRepository.existsByNickname(request.nickname) }
+                    verify(exactly = 0) { passwordEncoder.encode(any()) }
+                    verify(exactly = 0) { userRepository.save(any<UserEntity>()) }
+                }
+            }
+        }
+
+        given("회원가입시 중복검사 요청할 떄") {
+            `when`("중복된 로그인ID면") {
+                then("false를 반환한다.") {
+                    every { userRepository.existsByLoginId(any()) } returns true
+                    userService.isLoginIdAvailable("test1") shouldBe false
+                }
+            }
+
+            `when`("중복된 닉네임이면") {
+                then("false를 반환한다.") {
+                    every { userRepository.existsByNickname(any()) } returns true
+                    userService.isNicknameAvailable("테스트1") shouldBe false
+                }
+            }
+
         }
     }
 

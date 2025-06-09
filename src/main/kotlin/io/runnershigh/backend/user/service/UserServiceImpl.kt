@@ -2,7 +2,9 @@ package io.runnershigh.backend.user.service
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
 import io.runnershigh.backend.user.dto.request.LoginRequest
+import io.runnershigh.backend.user.dto.request.SignupRequest
 import io.runnershigh.backend.user.dto.response.LoginResponse
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
 import io.runnershigh.backend.user.repository.UserRepository
@@ -43,5 +45,37 @@ class UserServiceImpl(
             userId = user.id,
             nickname = user.nickname,
         )
+    }
+
+    override fun signup(request: SignupRequest): String {
+        // 1. 로그인ID 중복체크
+        if (!isLoginIdAvailable(request.loginId)) {
+            throw UserException(UserExceptionType.USER_LOGIN_ID_ALREADY_EXISTS)
+        }
+
+        // 2. 닉네임 중복체크
+        if (!isNicknameAvailable(request.nickname)) {
+            throw UserException(UserExceptionType.USER_NICKNAME_ALREADY_EXISTS)
+        }
+
+        // 3. 회원 가입 처리
+        val user = UserEntity(
+            loginId = request.loginId,
+            password = passwordEncoder.encode(request.password),
+            nickname = request.nickname,
+            gender = request.gender,
+            ageGroup = request.ageGroup
+        )
+        val savedUser = userRepository.save(user)
+
+        return savedUser.loginId
+    }
+
+    override fun isLoginIdAvailable(loginId: String): Boolean {
+        return !userRepository.existsByLoginId(loginId)
+    }
+
+    override fun isNicknameAvailable(nickname: String): Boolean {
+        return !userRepository.existsByNickname(nickname)
     }
 }

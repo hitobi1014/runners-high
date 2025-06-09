@@ -17,4 +17,14 @@ enum class UserExceptionType(
         httpStatus = HttpStatus.UNAUTHORIZED,
         message = "아이디 또는 비밀번호가 다릅니다.",
     ),
+    USER_LOGIN_ID_ALREADY_EXISTS(
+        errorCode = "USER_003",
+        httpStatus = HttpStatus.CONFLICT,
+        message = "이미 존재하는 로그인 아이디입니다.",
+    ),
+    USER_NICKNAME_ALREADY_EXISTS(
+        errorCode = "USER_004",
+        httpStatus = HttpStatus.CONFLICT,
+        message = "이미 존재하는 닉네임입니다.",
+    ),
 }

@@ -1,14 +1,14 @@
 package io.runnershigh.backend.user.entity.enum
 
-enum class Gender {
-    MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY;
+enum class Gender(val description: String) {
+    MALE("남성"),
+    FEMALE("여성"),
+    PREFER_NOT_TO_SAY("응답하지 않음");
 
-    fun toDisplayName(): String {
-        return when (this) {
-            MALE -> "남성"
-            FEMALE -> "여성"
-            OTHER -> "기타"
-            PREFER_NOT_TO_SAY -> "응답하지 않음"
+    companion object {
+        fun fromString(value: String): Gender {
+            return Gender.entries.find { it.name == value }
+                ?: throw IllegalArgumentException("선택한 Gender가 없습니다. $value")
         }
     }
 }
