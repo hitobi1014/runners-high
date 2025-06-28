@@ -3,6 +3,7 @@ package io.runnershigh.backend.training.controller
 import io.runnershigh.backend.shared.response.ApiResponse
 import io.runnershigh.backend.shared.response.CommonResponseMessage
 import io.runnershigh.backend.shared.response.ResponseUtils
+import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.service.TrainingSchedulesService
 import mu.KotlinLogging
@@ -36,7 +37,7 @@ class TrainingScheduleController(
 
     //    다음 훈련 일정 조회
     @GetMapping("/next")
-    fun getNextTrainingSchedule(): ResponseEntity<ApiResponse<ReadTrainingSchedule?>> {
+    fun getNextTrainingSchedule(): ResponseEntity<ApiResponse<NextTrainingSchedule?>> {
         val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
         return ResponseUtils.success(result, CommonResponseMessage.SUCCESS_GET_DATA.message)
     }

@@ -2,6 +2,7 @@ package io.runnershigh.backend.training.service
 
 import io.runnershigh.backend.shared.util.DateUtils
 import io.runnershigh.backend.training.dto.request.SaveTrainingSchedule
+import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.exception.TrainingException
@@ -62,7 +63,7 @@ class TrainingSchedulesServiceImpl(
         return trainingSchedulesList.map(TrainingSchedules::toDto)
     }
 
-    override fun getNextUpcomingTrainingSchedule(): ReadTrainingSchedule? {
+    override fun getNextUpcomingTrainingSchedule(): NextTrainingSchedule? {
         // #1. 현재 로그인 유저 가져오기
         val loginUser = loginUserContext.getCurrentUser()
 
@@ -70,6 +71,7 @@ class TrainingSchedulesServiceImpl(
         val trainingSchedule = trainingSchedulesRepository.retrieveNextUpcomingSchedule(loginUser)
 
         // #3. 엔티티 -> Schedule 변환
+        TODO("DTO 변경예정")
         return trainingSchedule?.toDto()
     }
 
