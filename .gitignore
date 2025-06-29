@@ -297,3 +297,6 @@ application-*.yml
 
 # 테스트 리소스들 제외
 test/resources/**
+
+# 환경변수
+.env
