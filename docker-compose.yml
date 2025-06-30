@@ -1,0 +1,22 @@
+version: '3'
+services:
+  app:
+    image: runners-high_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" #8080 노출 in:out
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker #docker 프로파일 활성화
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

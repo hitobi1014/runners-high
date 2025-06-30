@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.runnershigh"
-version = "0.0.1-SNAPSHOT"
+
 
 java {
     toolchain {
@@ -104,4 +104,15 @@ noArg {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    archiveBaseName.set("app") // JAR -> app
+    archiveVersion.set("") // 버전 번호 x
+}
+
+tasks.bootJar {
+    archiveBaseName.set("app") // JAR 파일명 app
+    archiveVersion.set("") // 버전 번호 x
+    archiveClassifier.set("") // plain 접미사 제거
 }
