@@ -7,6 +7,7 @@ import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
+import io.runnershigh.backend.training.extension.calculateTotalDistanceAndTime
 import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
@@ -69,10 +70,18 @@ class TrainingSchedulesServiceImpl(
 
         // #2. 다음 예정된 훈련 일정 가져오기
         val trainingSchedule = trainingSchedulesRepository.retrieveNextUpcomingSchedule(loginUser)
+            ?: return null
 
         // #3. 엔티티 -> Schedule 변환
-        TODO("DTO 변경예정")
-        return trainingSchedule?.toDto()
+        val (totalDistance, totalTime) = trainingSchedule.items.calculateTotalDistanceAndTime()
+
+        return NextTrainingSchedule(
+            scheduleId = trainingSchedule.id,
+            title = trainingSchedule.title,
+            scheduledDate = trainingSchedule.scheduledDate,
+            totalDistance = totalDistance,
+            totalTime = totalTime
+        )
     }
 
     private fun validateTrainingTime(schedule: LocalDate) {
