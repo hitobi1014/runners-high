@@ -25,6 +25,7 @@ import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.time.LocalTime
 
 
 @ExtendWith(MockKExtension::class)
@@ -222,6 +223,67 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         mockSchedule2.toDto()
                     }
 
+                }
+            }
+        }
+
+        Given("다음 예정된 훈련 일정이 있는 상태에서") {
+            val mockUser = userEntity("test6")
+            val futureDate = LocalDate.now().plusDays(3)
+            
+            val mockTrainingSchedule = TrainingScheduleFixture.createEntityMockWithItems(
+                id = 1L,
+                title = "템포런 훈련",
+                scheduledDate = futureDate,
+                user = mockUser
+            )
+
+            every { loginUserContext.getCurrentUser() } returns mockUser
+            every { repository.retrieveNextUpcomingSchedule(mockUser) } returns mockTrainingSchedule
+
+            When("다음 예정된 훈련 일정을 조회하면") {
+                val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
+
+                Then("다음 훈련 일정 정보를 반환한다") {
+                    result shouldBe result
+                    result?.scheduleId shouldBe 1L
+                    result?.title shouldBe "템포런 훈련"
+                    result?.scheduledDate shouldBe futureDate
+                    result?.totalDistance shouldBe 10.0
+                    result?.totalTime shouldBe LocalTime.of(0, 50)
+
+                    verify {
+                        loginUserContext.getCurrentUser()
+                        repository.retrieveNextUpcomingSchedule(mockUser)
+                        mockTrainingSchedule.items
+                        mockTrainingSchedule.id
+                        mockTrainingSchedule.title
+                        mockTrainingSchedule.scheduledDate
+                    }
+
+                    confirmVerified(loginUserContext, repository, mockTrainingSchedule)
+                }
+            }
+        }
+
+        Given("예정된 훈련 일정이 없는 상태에서") {
+            val mockUser = userEntity("test7")
+
+            every { loginUserContext.getCurrentUser() } returns mockUser
+            every { repository.retrieveNextUpcomingSchedule(mockUser) } returns null
+
+            When("다음 예정된 훈련 일정을 조회하면") {
+                val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
+
+                Then("null을 반환한다") {
+                    result shouldBe null
+
+                    verify {
+                        loginUserContext.getCurrentUser()
+                        repository.retrieveNextUpcomingSchedule(mockUser)
+                    }
+
+                    confirmVerified(loginUserContext, repository)
                 }
             }
         }
