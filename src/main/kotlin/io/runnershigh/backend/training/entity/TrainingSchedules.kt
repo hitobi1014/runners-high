@@ -45,6 +45,6 @@ class TrainingSchedules(
     @OneToMany(mappedBy = "schedule", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val groups: MutableList<TrainingPlanGroups> = mutableListOf(),
 
-    @OneToMany(mappedBy = "schedule", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    val items: MutableList<TrainingPlanItems> = mutableListOf(),
+//    @OneToMany(mappedBy = "schedule", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+//    val items: MutableList<TrainingPlanItems> = mutableListOf(),
 ) : BaseEntity()
