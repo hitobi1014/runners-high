@@ -25,7 +25,7 @@ class TrainingPlanGroups(
     @Comment("그룹 설명")
     var description: String,
 
-    @OneToMany(mappedBy = "group", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
     val items: MutableList<TrainingPlanItems> = mutableListOf(),
 
     ) : BaseEntity()
