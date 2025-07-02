@@ -1,7 +1,7 @@
 package io.runnershigh.backend.training.service
 
 import io.runnershigh.backend.shared.util.DateUtils
-import io.runnershigh.backend.training.dto.request.SaveTrainingSchedule
+import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
@@ -29,7 +29,7 @@ class TrainingSchedulesServiceImpl(
         private const val MAX_FUTURE_DAYS = 365L
     }
 
-    override fun createTrainingSchedule(dto: SaveTrainingSchedule): TrainingSchedules {
+    override fun createTrainingSchedule(dto: SaveTrainingInfo): TrainingSchedules {
         // step01. 훈련일자 값 검증 -> 훈련일자가 현재보다 이전일 수 없음
         validateTrainingTime(dto.scheduledDate)
 
@@ -73,7 +73,9 @@ class TrainingSchedulesServiceImpl(
             ?: return null
 
         // #3. 엔티티 -> Schedule 변환
-        val (totalDistance, totalTime) = trainingSchedule.items.calculateTotalDistanceAndTime()
+
+        val allItems = trainingSchedule.groups.flatMap { it.items }
+        val (totalDistance, totalTime) = allItems.calculateTotalDistanceAndTime()
 
         return NextTrainingSchedule(
             scheduleId = trainingSchedule.id,
