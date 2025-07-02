@@ -1,8 +1,12 @@
 package io.runnershigh.backend.init
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
+import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.enum.DistanceUnit
+import io.runnershigh.backend.training.entity.enum.TargetType
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.entity.enum.AgeGroup
@@ -18,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.*
 
@@ -26,6 +31,7 @@ import java.util.*
 class DataInitializer(
     private val userRepository: UserRepository,
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
+    private val trainingPlanItemsRepository: TrainingPlanItemsRepository,
     private val jwtTokenProvider: JwtTokenProvider,
     private val passwordEncoder: PasswordEncoder,
 
@@ -46,20 +52,19 @@ class DataInitializer(
         }
         initUsers()
         initTrainingSchedules()
+        initTrainingPlanItems()
         initToken()
     }
 
     // 토큰 발급 후 로깅 출력
     private fun initToken() {
-        val user =
-            userRepository.findByLoginId("test1") ?: throw IllegalStateException("User not found")
+        val user = getUserByLoginId()
         val token = jwtTokenProvider.generateAccessToken(user.id, user.nickname)
         logger.info { "#유저 토큰 정보 test1 : $token" }
     }
 
     private fun initTrainingSchedules() {
-        val user =
-            userRepository.findByLoginId("test1") ?: throw IllegalStateException("User not found")
+        val user = getUserByLoginId()
 
         val startInstant = LocalDate.now().atStartOfDay(zoneId).toInstant()
         val endInstant = LocalDate.now().plusDays(7).atStartOfDay(zoneId).toInstant()
@@ -72,10 +77,38 @@ class DataInitializer(
         trainingSchedulesRepository.flush()
     }
 
+    private fun initTrainingPlanItems() {
+        val user = getUserByLoginId()
+        // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전 
+        val trainingSchedules = createSchedule2(user, LocalDate.now().plusDays(1))
+        trainingSchedulesRepository.save(trainingSchedules)
+        trainingSchedulesRepository.flush()
+
+        val planItem1 =
+            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 1)
+        val planItem2 =
+            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 2)
+        val planItem3 =
+            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 3)
+
+        trainingPlanItemsRepository.saveAll(listOf(planItem1, planItem2, planItem3))
+        trainingPlanItemsRepository.flush()
+    }
+
+    private fun getUserByLoginId(): UserEntity {
+        val user =
+            userRepository.findByLoginId("test1") ?: throw IllegalStateException("User not found")
+        return user
+    }
+
     private fun initUsers() {
         logger.info { "initUsers 실행" }
-        val user1 = createUser(loginId = "test1", password = passwordEncoder.encode("test1"))
-        val user2 = createUser(loginId = "test2")
+        val user1 = createUser(
+            loginId = "test1",
+            password = passwordEncoder.encode("test1"),
+            nickname = "테스트1"
+        )
+        val user2 = createUser(loginId = "test2", nickname = "테스트2")
         userRepository.saveAll(listOf(user1, user2))
         userRepository.flush()
     }
@@ -91,6 +124,21 @@ class DataInitializer(
             location = faker.address().streetAddress(),
             scheduledDate = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
                 .toLocalDate(),
+            color = faker.color().hex(),
+            description = faker.lorem().characters(20, 100),
+            status = TrainingStatus.PLANNED
+        )
+    }
+
+    private fun createSchedule2(
+        user: UserEntity,
+        scheduleDate: LocalDate,
+    ): TrainingSchedules {
+        return TrainingSchedules(
+            user = user,
+            title = faker.lorem().characters(10, 100),
+            location = faker.address().streetAddress(),
+            scheduledDate = scheduleDate,
             color = faker.color().hex(),
             description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
@@ -114,4 +162,53 @@ class DataInitializer(
             ageGroup = ageGroup,
         )
     }
+
+    private fun createTrainingPlanItems(
+        schedule: TrainingSchedules,
+        itemOrder: Int = faker.number().numberBetween(1, 10),
+        targetType: TargetType = faker.options().option(TargetType::class.java),
+        targetMinPace: LocalTime = LocalTime.of(
+            faker.number().numberBetween(4, 6),
+            faker.number().numberBetween(0, 59)
+        ),
+        targetMaxPace: LocalTime = LocalTime.of(
+            faker.number().numberBetween(5, 7),
+            faker.number().numberBetween(0, 59)
+        ),
+        targetAvgPace: LocalTime = LocalTime.of(
+            faker.number().numberBetween(4, 6),
+            faker.number().numberBetween(30, 59)
+        ),
+        runningTypeCode: Int = faker.number().numberBetween(1, 5),
+        distanceUnit: DistanceUnit = faker.options().option(DistanceUnit::class.java),
+        targetDistance: Double = faker.number().randomDouble(1, 1, 20),
+        targetTime: LocalTime = LocalTime.of(
+            faker.number().numberBetween(0, 2),
+            faker.number().numberBetween(0, 59)
+        ),
+        estimatedDistance: Double = faker.number().randomDouble(1, 1, 20),
+        estimatedTime: LocalTime = LocalTime.of(
+            faker.number().numberBetween(0, 2),
+            faker.number().numberBetween(0, 59)
+        ),
+        note: String = faker.lorem().sentence(faker.number().numberBetween(5, 20)),
+    ): TrainingPlanItems {
+        return TrainingPlanItems(
+            schedule = schedule,
+            itemOrder = itemOrder,
+            targetType = targetType,
+            targetMinPace = targetMinPace,
+            targetMaxPace = targetMaxPace,
+            targetAvgPace = targetAvgPace,
+            runningTypeCode = runningTypeCode,
+            distanceUnit = distanceUnit,
+            targetDistance = targetDistance,
+            targetTime = targetTime,
+            estimatedDistance = estimatedDistance,
+            estimatedTime = estimatedTime,
+            note = note
+        )
+    }
+
+
 }

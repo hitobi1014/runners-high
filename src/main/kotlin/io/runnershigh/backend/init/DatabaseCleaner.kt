@@ -60,24 +60,53 @@ class DatabaseCleaner(
                 logger.info { "총 ${tables.size}개 테이블 : ${tables.joinToString()}" }
 
                 connection.createStatement().use { stmt ->
-                    // 테이블을 역순으로 처리하면 외래키 문제가 덜 발생함
-                    tables.reversed().forEach { tableName ->
+                    // 의존성 순서에 따라 테이블 삭제 (자식 테이블부터 부모 테이블 순으로)
+                    val orderedTables = getTablesInDeletionOrder(tables)
+                    
+                    orderedTables.forEach { tableName ->
                         try {
                             logger.debug { "테이블 데이터 삭제 중: $tableName" }
-                            // TRUNCATE 대신 DELETE 사용
-                            stmt.executeUpdate("DELETE FROM $tableName")
+                            // CASCADE 옵션으로 외래키 제약조건 무시하고 삭제
+                            stmt.executeUpdate("TRUNCATE TABLE $tableName RESTART IDENTITY CASCADE")
                         } catch (e: SQLException) {
-                            logger.warn { "테이블 비우기 실패: $tableName - ${e.message}" }
+                            logger.warn { "TRUNCATE 실패, DELETE 시도: $tableName - ${e.message}" }
+                            try {
+                                // TRUNCATE가 실패하면 DELETE 사용
+                                stmt.executeUpdate("DELETE FROM $tableName")
+                            } catch (e2: SQLException) {
+                                logger.warn { "테이블 비우기 완전 실패: $tableName - ${e2.message}" }
+                            }
                         }
                     }
                 }
                 logger.info { "모든 테이블 비우기 작업 완료" }
-
-                resetIdentityColumns(connection)
             }
         } catch (e: SQLException) {
             logger.error(e) { "DB 비우기 실패: ${e.message}" }
         }
+    }
+
+    // 외래키 의존성에 따라 테이블 삭제 순서 결정
+    private fun getTablesInDeletionOrder(tables: List<String>): List<String> {
+        // 자식 테이블부터 부모 테이블 순으로 정렬
+        val orderedTables = mutableListOf<String>()
+        
+        // 1. 가장 하위 자식 테이블들 (다른 테이블을 참조하지 않는 테이블들)
+        tables.filter { it.startsWith("training_items") || it.startsWith("training_plan_items") }.forEach { orderedTables.add(it) }
+        tables.filter { it.startsWith("training_groups") || it.startsWith("training_plan_groups") }.forEach { orderedTables.add(it) }
+        
+        // 2. 중간 테이블들 (users를 참조하는 테이블들)
+        tables.filter { it.startsWith("training_schedules") }.forEach { orderedTables.add(it) }
+        tables.filter { it.startsWith("training_") && !orderedTables.contains(it) }.forEach { orderedTables.add(it) }
+        
+        // 3. 부모 테이블 (users)
+        tables.filter { it == "users" }.forEach { orderedTables.add(it) }
+        
+        // 4. 나머지 테이블들
+        tables.filter { !orderedTables.contains(it) }.forEach { orderedTables.add(it) }
+        
+        logger.debug { "테이블 삭제 순서: ${orderedTables.joinToString()}" }
+        return orderedTables
     }
 
     // 시퀀스 초기화 (ID가 1부터 다시 시작하게)

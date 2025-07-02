@@ -9,6 +9,7 @@ import io.runnershigh.backend.shared.response.CommonResponseMessage
 import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDate
+import java.time.LocalTime
 
 @WebMvcTest(
     controllers = [TrainingScheduleController::class],
@@ -35,7 +37,7 @@ class TrainingScheduleControllerTest(
     val baseUrl = "/api/training-schedule"
 
     Given("다음 훈련 일정이 있는 상태에서") {
-        val mockSchedule = createTrainingSchedule()
+        val mockSchedule = createNextTrainingSchedule()
 
         every { trainingScheduleUseCase.getNextUpcomingTrainingSchedule() } returns mockSchedule
 
@@ -48,7 +50,7 @@ class TrainingScheduleControllerTest(
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.message").value(CommonResponseMessage.SUCCESS_GET_DATA.message))
-                    .andExpect(jsonPath("$.data.id").value(mockSchedule.id))
+                    .andExpect(jsonPath("$.data.scheduleId").value(mockSchedule.scheduleId))
                     .andExpect(jsonPath("$.data.title").value(mockSchedule.title))
 
                 verify(exactly = 1) { trainingScheduleUseCase.getNextUpcomingTrainingSchedule() }
@@ -102,8 +104,7 @@ private fun createTrainingSchedule(
     description: String = "즐겁게 뛰기",
     status: TrainingStatus = TrainingStatus.PLANNED,
     color: String = "#ff0000",
-
-    ) = ReadTrainingSchedule(
+) = ReadTrainingSchedule(
     id = id,
     title = title,
     location = location,
@@ -111,4 +112,18 @@ private fun createTrainingSchedule(
     description = description,
     status = status,
     color = color
+)
+
+private fun createNextTrainingSchedule(
+    scheduleId: Long = 1L,
+    title: String = "올림픽 공원 펀런",
+    scheduledDate: LocalDate = LocalDate.now(),
+    totalDistance: Double = 10.0,
+    totalTime: LocalTime = LocalTime.of(0, 50)
+) = NextTrainingSchedule(
+    scheduleId = scheduleId,
+    title = title,
+    scheduledDate = scheduledDate,
+    totalDistance = totalDistance,
+    totalTime = totalTime
 )
