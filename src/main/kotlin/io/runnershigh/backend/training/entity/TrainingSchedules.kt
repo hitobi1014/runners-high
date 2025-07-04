@@ -1,6 +1,7 @@
 package io.runnershigh.backend.training.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
+import io.runnershigh.backend.training.entity.enum.TrainingColor
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import jakarta.persistence.*
@@ -37,8 +38,9 @@ class TrainingSchedules(
     @Comment("훈련일정 상태")
     var status: TrainingStatus,
 
+    @Enumerated(EnumType.STRING)
     @Comment("색상")
-    var color: String,
+    var color: TrainingColor,
 
     // 양방향 설정, 훈련일정 삭제시 그룹도 함께 삭제
     // orphanRemoval = 컬렉션에서 삭제시, DB에서도 삭제
