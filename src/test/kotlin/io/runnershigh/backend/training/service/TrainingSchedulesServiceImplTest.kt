@@ -11,10 +11,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.fixture.UserFixture
+import io.runnershigh.backend.fixture.training.TrainingInfoFixture
 import io.runnershigh.backend.shared.util.DateUtils
-import io.runnershigh.backend.training.dto.request.SaveTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.exception.TrainingException
@@ -40,13 +39,15 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
     private fun userEntity(loginId: String) = UserFixture.createDefault(id = 1, loginId = loginId)
 
-    private fun saveTrainingSchedule() = SaveTrainingSchedule(
-        title = "템포런",
-        location = "보라매공원",
-        scheduledDate = LocalDate.now().plusDays(5),
-        description = "빡세게 달려볼까",
-        color = "#B5EAD7"
-    )
+    private fun saveTrainingSchedule() = TrainingInfoFixture.createSaveTrainingInfo()
+
+//    private fun saveTrainingSchedule() = SaveTrainingInfo(
+//        title = "템포런",
+//        location = "보라매공원",
+//        scheduledDate = LocalDate.now().plusDays(5),
+//        description = "빡세게 달려볼까",
+//        color = "#B5EAD7"
+//    )
 
     init {
         beforeSpec {
@@ -148,7 +149,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
         Given("유저가 등록한 훈련일정이 있을때") {
             val mockUser = userEntity("test4")
             val mockTrainingSchedules =
-                TrainingScheduleFixture.createMultipleEntityMocks(2, mockUser)
+                TrainingInfoFixture.createMultipleEntityMocks(2, mockUser)
 
             every { loginUserContext.getCurrentUser() } returns mockUser
             every { repository.retrieveTrainingSchedules(mockUser) } returns mockTrainingSchedules
@@ -185,12 +186,12 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             val previousSunday = DateUtils.findPreviousSunday(currentDate)
             val nextSaturday = DateUtils.findNextSaturday(currentDate)
 
-            val mockSchedule1 = TrainingScheduleFixture.createEntityMock(
+            val mockSchedule1 = TrainingInfoFixture.createEntityMock(
                 id = 1L,
                 scheduledDate = previousSunday.plusDays(1),
                 user = mockUser,
             )
-            val mockSchedule2 = TrainingScheduleFixture.createEntityMock(
+            val mockSchedule2 = TrainingInfoFixture.createEntityMock(
                 id = 2L,
                 scheduledDate = nextSaturday.minusDays(3),
                 user = mockUser,
@@ -230,8 +231,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
         Given("다음 예정된 훈련 일정이 있는 상태에서") {
             val mockUser = userEntity("test6")
             val futureDate = LocalDate.now().plusDays(3)
-            
-            val mockTrainingSchedule = TrainingScheduleFixture.createEntityMockWithItems(
+
+            val mockTrainingSchedule = TrainingInfoFixture.createEntityMockWithItems(
                 id = 1L,
                 title = "템포런 훈련",
                 scheduledDate = futureDate,
@@ -255,10 +256,10 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     verify {
                         loginUserContext.getCurrentUser()
                         repository.retrieveNextUpcomingSchedule(mockUser)
-                        mockTrainingSchedule.items
                         mockTrainingSchedule.id
                         mockTrainingSchedule.title
                         mockTrainingSchedule.scheduledDate
+                        mockTrainingSchedule.groups
                     }
 
                     confirmVerified(loginUserContext, repository, mockTrainingSchedule)

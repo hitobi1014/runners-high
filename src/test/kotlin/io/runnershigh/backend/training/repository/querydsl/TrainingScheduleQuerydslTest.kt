@@ -3,7 +3,7 @@ package io.runnershigh.backend.training.repository.querydsl
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
+import io.runnershigh.backend.fixture.training.TrainingInfoFixture
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.shared.annotation.QuerydslTest
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
@@ -25,7 +25,7 @@ class TrainingScheduleQuerydslTest : BehaviorSpec() {
         val user = UserFixture.createDefault(loginId = "test1")
         testEntityManager.persist(user)
 
-        val trainingSchedules = TrainingScheduleFixture.createDefault(
+        val trainingSchedules = TrainingInfoFixture.createDefault(
             scheduledDate = LocalDate.now().plusDays(1),
             title = "보라매런",
             user = user

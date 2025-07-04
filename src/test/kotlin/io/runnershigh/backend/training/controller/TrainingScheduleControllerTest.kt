@@ -5,11 +5,9 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import io.runnershigh.backend.fixture.training.TrainingInfoFixture
 import io.runnershigh.backend.shared.response.CommonResponseMessage
 import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
-import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
-import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
@@ -21,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDate
-import java.time.LocalTime
 
 @WebMvcTest(
     controllers = [TrainingScheduleController::class],
@@ -37,7 +34,7 @@ class TrainingScheduleControllerTest(
     val baseUrl = "/api/training-schedule"
 
     Given("다음 훈련 일정이 있는 상태에서") {
-        val mockSchedule = createNextTrainingSchedule()
+        val mockSchedule = TrainingInfoFixture.createNextTrainingSchedule()
 
         every { trainingScheduleUseCase.getNextUpcomingTrainingSchedule() } returns mockSchedule
 
@@ -59,13 +56,12 @@ class TrainingScheduleControllerTest(
     }
 
     Given("이번 주 훈련 일정이 있는 상태에서") {
-        val mockSchedule1 = createTrainingSchedule()
-        val mockSchedule2 = createTrainingSchedule(
-            id = 2L,
-            title = "보라매 공원 템포런",
+        val mockSchedule1 = TrainingInfoFixture.createReadTrainingSchedule()
+        val mockSchedule2 = TrainingInfoFixture.createReadTrainingSchedule(
+            id = 2L, title = "보라매 공원 템포런",
             scheduledDate = LocalDate.now().plusDays(1)
         )
-        val mockSchedule3 = createTrainingSchedule(
+        val mockSchedule3 = TrainingInfoFixture.createReadTrainingSchedule(
             id = 3L,
             title = "남산 업힐",
             scheduledDate = LocalDate.now().plusDays(3)
@@ -95,35 +91,3 @@ class TrainingScheduleControllerTest(
     }
 
 })
-
-private fun createTrainingSchedule(
-    id: Long = 1L,
-    title: String = "올림픽 공원 펀런",
-    location: String = "올림픽 공원",
-    scheduledDate: LocalDate = LocalDate.now(),
-    description: String = "즐겁게 뛰기",
-    status: TrainingStatus = TrainingStatus.PLANNED,
-    color: String = "#ff0000",
-) = ReadTrainingSchedule(
-    id = id,
-    title = title,
-    location = location,
-    scheduledDate = scheduledDate,
-    description = description,
-    status = status,
-    color = color
-)
-
-private fun createNextTrainingSchedule(
-    scheduleId: Long = 1L,
-    title: String = "올림픽 공원 펀런",
-    scheduledDate: LocalDate = LocalDate.now(),
-    totalDistance: Double = 10.0,
-    totalTime: LocalTime = LocalTime.of(0, 50)
-) = NextTrainingSchedule(
-    scheduleId = scheduleId,
-    title = title,
-    scheduledDate = scheduledDate,
-    totalDistance = totalDistance,
-    totalTime = totalTime
-)
