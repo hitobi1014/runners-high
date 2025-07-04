@@ -2,6 +2,7 @@ package io.runnershigh.backend.training.dto.request
 
 import io.runnershigh.backend.training.entity.enum.DistanceUnit
 import io.runnershigh.backend.training.entity.enum.TargetType
+import io.runnershigh.backend.training.entity.enum.TrainingColor
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
@@ -18,10 +19,7 @@ data class SaveTrainingInfo(
     val description: String = "",
     val status: TrainingStatus = TrainingStatus.PLANNED,
     @field:NotNull(message = "색상은 필수입니다.")
-    @field:Pattern(
-        regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", message = "올바른 HEX 색상 코드 형식이어야 합니다."
-    )
-    val color: String,
+    val color: TrainingColor,
     @field:Valid
     @field:NotEmpty(message = "훈련 그룹은 최소 1개 이상이어야 합니다.")
     val groups: List<SaveTrainingGroup>,
