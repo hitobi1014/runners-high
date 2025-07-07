@@ -46,7 +46,4 @@ class TrainingSchedules(
     // orphanRemoval = 컬렉션에서 삭제시, DB에서도 삭제
     @OneToMany(mappedBy = "schedule", cascade = [CascadeType.ALL], orphanRemoval = true)
     val groups: MutableList<TrainingPlanGroups> = mutableListOf(),
-
-//    @OneToMany(mappedBy = "schedule", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-//    val items: MutableList<TrainingPlanItems> = mutableListOf(),
 ) : BaseEntity()
