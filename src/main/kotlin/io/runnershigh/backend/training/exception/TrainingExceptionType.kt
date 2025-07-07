@@ -26,5 +26,29 @@ enum class TrainingExceptionType(
         message = "해당 정보로 등록된 훈련 일정을 찾을 수 없습니다."
     ),
 
+    INVALID_GROUP_ORDER(
+        errorCode = "TRAINING_004",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "그룹 순서는 1부터 연속적이어야 합니다."
+    ),
+
+    INVALID_ITEM_ORDER(
+        errorCode = "TRAINING_005",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "아이템 순서는 1부터 연속적이어야 합니다."
+    ),
+
+    INVALID_PACE_RANGE(
+        errorCode = "TRAINING_006",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "페이스 범위가 올바르지 않습니다. (최소 ≤ 평균 ≤ 최대)"
+    ),
+
+    TRAINING_DISTANCE_LIMIT_EXCEEDED(
+        errorCode = "TRAINING_007",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "총 훈련 거리는 100km를 초과할 수 없습니다."
+    ),
+
 
 }
