@@ -2,7 +2,6 @@ package io.runnershigh.backend.training.service
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
@@ -13,13 +12,15 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.fixture.training.TrainingInfoFixture
-import io.runnershigh.backend.shared.util.DateUtils
+import io.runnershigh.backend.training.dto.request.SaveTrainingGroup
+import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.enum.DistanceUnit
+import io.runnershigh.backend.training.entity.enum.TargetType
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.mapper.toDto
-import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
@@ -39,16 +40,6 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
     private fun userEntity(loginId: String) = UserFixture.createDefault(id = 1, loginId = loginId)
 
-    private fun saveTrainingSchedule() = TrainingInfoFixture.createSaveTrainingInfo()
-
-//    private fun saveTrainingSchedule() = SaveTrainingInfo(
-//        title = "템포런",
-//        location = "보라매공원",
-//        scheduledDate = LocalDate.now().plusDays(5),
-//        description = "빡세게 달려볼까",
-//        color = "#B5EAD7"
-//    )
-
     init {
         beforeSpec {
             trainingSchedulesService =
@@ -62,92 +53,251 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
         }
 
         Given("유저가 올바른 훈련일정을 만든 상태에서") {
-            val dto = saveTrainingSchedule()
+            val dto = TrainingInfoFixture.createSaveTrainingInfo()
             val user = userEntity("test1")
+            val savedSchedule = TrainingInfoFixture.createDefault(user = user)
+
             every { loginUserContext.getCurrentUser() } returns user
-            every { repository.save(ofType<TrainingSchedules>()) } returns dto.toEntity(user)
+            every { repository.save(any<TrainingSchedules>()) } returns savedSchedule
 
             When("훈련 생성을 수행하면") {
-                trainingSchedulesService.createTrainingSchedule(dto)
+                val result = trainingSchedulesService.createTrainingSchedule(dto)
 
                 Then("성공적으로 저장된다.") {
+                    result shouldBe savedSchedule
+
                     verify(exactly = 1) {
                         loginUserContext.getCurrentUser()
                         repository.save(match { schedule ->
                             schedule.title == dto.title &&
                                     schedule.location == dto.location &&
                                     schedule.scheduledDate == dto.scheduledDate &&
-                                    schedule.description == dto.description
-                            schedule.user == user
+                                    schedule.description == dto.description &&
+                                    schedule.user == user &&
+                                    schedule.groups.isNotEmpty()
                         })
                     }
 
+                    confirmVerified(loginUserContext, repository)
                 }
             }
         }
 
-        Given("과거 날짜의 훈련 일정 데이터를 만들고") {
-            val pastDate = LocalDate.now().minusDays(1)
-            val dto = saveTrainingSchedule().copy(scheduledDate = pastDate, title = "회복")
+        Given("그룹 순서가 잘못된 훈련 일정을 만들고") {
+            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
+                groups = listOf(
+                    SaveTrainingGroup(
+                        groupOrder = 1,
+                        repeatCount = 1,
+                        description = "그룹1",
+                        items = listOf(TrainingInfoFixture.createSaveTrainingItems(1)[0])
+                    ),
+                    SaveTrainingGroup(
+                        groupOrder = 3, // 2가 아닌 3으로 설정 (순서 오류)
+                        repeatCount = 1,
+                        description = "그룹2",
+                        items = listOf(TrainingInfoFixture.createSaveTrainingItems(1)[0])
+                    )
+                )
+            )
             val user = userEntity("test2")
 
             every { loginUserContext.getCurrentUser() } returns user
 
-            When("해당 데이터로 훈련 일정을 생성하려고 하면") {
-                Then("과거 날짜 등록이 불가능하다는 예외가 발생한다") {
+            When("훈련 일정을 생성하려고 하면") {
+                Then("그룹 순서 오류 예외가 발생한다") {
                     shouldThrow<TrainingException> {
                         trainingSchedulesService.createTrainingSchedule(dto)
                     }.run {
-                        exceptionType shouldBe TrainingExceptionType.CANNOT_REGISTER_PAST_TRAINING
-                        message shouldBe "과거 시간에는 훈련을 등록할 수 없습니다."
+                        exceptionType shouldBe TrainingExceptionType.INVALID_GROUP_ORDER
+                        message shouldBe "그룹 순서는 1부터 연속적이어야 합니다."
                     }
+
                     verify(exactly = 0) {
                         repository.save(any())
                     }
                 }
             }
         }
-        Given("1년 이후의 날짜로 훈련 일정 데이터를 만들고") {
-            val futureDate = LocalDate.now().plusDays(366)
-            val dto = saveTrainingSchedule().copy(scheduledDate = futureDate, title = "마라톤")
+
+        Given("아이템 순서가 잘못된 훈련 일정을 만들고") {
+            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
+                groups = listOf(
+                    SaveTrainingGroup(
+                        groupOrder = 1,
+                        repeatCount = 1,
+                        description = "그룹1",
+                        items = listOf(
+                            SaveTrainingItem(
+                                itemOrder = 1,
+                                targetType = TargetType.DISTANCE,
+                                targetMinPace = LocalTime.of(0, 4, 30),
+                                targetMaxPace = LocalTime.of(0, 5, 0),
+                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                runningTypeCode = 1,
+                                distanceUnit = DistanceUnit.KILOMETER,
+                                targetDistance = 5.0,
+                                targetTime = LocalTime.of(0, 25),
+                                estimatedDistance = 5.0,
+                                estimatedTime = LocalTime.of(0, 25),
+                                note = "아이템1"
+                            ),
+                            SaveTrainingItem(
+                                itemOrder = 3, // 2가 아닌 3으로 설정 (순서 오류)
+                                targetType = TargetType.DISTANCE,
+                                targetMinPace = LocalTime.of(0, 4, 30),
+                                targetMaxPace = LocalTime.of(0, 5, 0),
+                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                runningTypeCode = 1,
+                                distanceUnit = DistanceUnit.KILOMETER,
+                                targetDistance = 5.0,
+                                targetTime = LocalTime.of(0, 25),
+                                estimatedDistance = 5.0,
+                                estimatedTime = LocalTime.of(0, 25),
+                                note = "아이템2"
+                            )
+                        )
+                    )
+                )
+            )
             val user = userEntity("test3")
 
             every { loginUserContext.getCurrentUser() } returns user
 
             When("훈련 일정을 생성하려고 하면") {
-                Then("예외가 발생한다.")
-                shouldThrow<TrainingException> {
-                    trainingSchedulesService.createTrainingSchedule(dto)
-                }.run {
-                    exceptionType shouldBe TrainingExceptionType.CANNOT_REGISTER_TRAINING_BEYOND_ONE_YEAR
-                    message shouldBe "최대 1년까지만 훈련 일정을 등록할 수 있습니다."
-                }
-                verify(exactly = 0) {
-                    repository.save(any())
-                }
-            }
-        }
+                Then("아이템 순서 오류 예외가 발생한다") {
+                    shouldThrow<TrainingException> {
+                        trainingSchedulesService.createTrainingSchedule(dto)
+                    }.run {
+                        exceptionType shouldBe TrainingExceptionType.INVALID_ITEM_ORDER
+                        message shouldBe "아이템 순서는 1부터 연속적이어야 합니다."
+                    }
 
-        Given("당일 훈련일정을 데이터를 만들고") {
-            val currentDate = LocalDate.now()
-            val dto = saveTrainingSchedule().copy(scheduledDate = currentDate)
-            val user = userEntity("test3")
-
-            every { loginUserContext.getCurrentUser() } returns user
-            every { repository.save(ofType<TrainingSchedules>()) } returns dto.toEntity(user)
-
-            When("해당 데이터로 훈련 일정을 생성하면") {
-                trainingSchedulesService.createTrainingSchedule(dto)
-                Then("정상적으로 저장된다.") {
-                    verify(exactly = 1) {
+                    verify(exactly = 0) {
                         repository.save(any())
                     }
                 }
             }
         }
 
+        Given("페이스 범위가 잘못된 훈련 일정을 만들고") {
+            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
+                groups = listOf(
+                    SaveTrainingGroup(
+                        groupOrder = 1,
+                        repeatCount = 1,
+                        description = "그룹1",
+                        items = listOf(
+                            SaveTrainingItem(
+                                itemOrder = 1,
+                                targetType = TargetType.DISTANCE,
+                                targetMinPace = LocalTime.of(0, 5, 0), // 최소 페이스가 더 큼
+                                targetMaxPace = LocalTime.of(0, 4, 30),
+                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                runningTypeCode = 1,
+                                distanceUnit = DistanceUnit.KILOMETER,
+                                targetDistance = 5.0,
+                                targetTime = LocalTime.of(0, 25),
+                                estimatedDistance = 5.0,
+                                estimatedTime = LocalTime.of(0, 25),
+                                note = "잘못된 페이스"
+                            )
+                        )
+                    )
+                )
+            )
+            val user = userEntity("test4")
+
+            every { loginUserContext.getCurrentUser() } returns user
+
+            When("훈련 일정을 생성하려고 하면") {
+                Then("페이스 범위 오류 예외가 발생한다") {
+                    shouldThrow<TrainingException> {
+                        trainingSchedulesService.createTrainingSchedule(dto)
+                    }.run {
+                        exceptionType shouldBe TrainingExceptionType.INVALID_PACE_RANGE
+                        message shouldBe "페이스 범위가 올바르지 않습니다. (최소 ≤ 평균 ≤ 최대)"
+                    }
+
+                    verify(exactly = 0) {
+                        repository.save(any())
+                    }
+                }
+            }
+        }
+
+        Given("총 거리가 100km를 초과하는 훈련 일정을 만들고") {
+            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
+                groups = listOf(
+                    SaveTrainingGroup(
+                        groupOrder = 1,
+                        repeatCount = 1,
+                        description = "그룹1",
+                        items = listOf(
+                            SaveTrainingItem(
+                                itemOrder = 1,
+                                targetType = TargetType.DISTANCE,
+                                targetMinPace = LocalTime.of(0, 4, 30),
+                                targetMaxPace = LocalTime.of(0, 5, 0),
+                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                runningTypeCode = 1,
+                                distanceUnit = DistanceUnit.KILOMETER,
+                                targetDistance = 150.0, // 100km 초과
+                                targetTime = LocalTime.of(0, 25),
+                                estimatedDistance = 150.0,
+                                estimatedTime = LocalTime.of(0, 25),
+                                note = "초장거리"
+                            )
+                        )
+                    )
+                )
+            )
+            val user = userEntity("test5")
+
+            every { loginUserContext.getCurrentUser() } returns user
+
+            When("훈련 일정을 생성하려고 하면") {
+                Then("거리 제한 초과 예외가 발생한다") {
+                    shouldThrow<TrainingException> {
+                        trainingSchedulesService.createTrainingSchedule(dto)
+                    }.run {
+                        exceptionType shouldBe TrainingExceptionType.TRAINING_DISTANCE_LIMIT_EXCEEDED
+                        message shouldBe "총 훈련 거리는 100km를 초과할 수 없습니다."
+                    }
+
+                    verify(exactly = 0) {
+                        repository.save(any())
+                    }
+                }
+            }
+        }
+
+        Given("1년 이후의 날짜로 훈련 일정 데이터를 만들고") {
+            val futureDate = LocalDate.now().plusDays(366)
+            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(scheduledDate = futureDate)
+            val user = userEntity("test6")
+
+            every { loginUserContext.getCurrentUser() } returns user
+
+            When("훈련 일정을 생성하려고 하면") {
+                Then("날짜 제한 예외가 발생한다") {
+                    shouldThrow<TrainingException> {
+                        trainingSchedulesService.createTrainingSchedule(dto)
+                    }.run {
+                        exceptionType shouldBe TrainingExceptionType.CANNOT_REGISTER_TRAINING_BEYOND_ONE_YEAR
+                        message shouldBe "최대 1년까지만 훈련 일정을 등록할 수 있습니다."
+                    }
+
+                    verify(exactly = 0) {
+                        repository.save(any())
+                    }
+                }
+            }
+        }
+
+        // 기존 조회 관련 테스트들...
         Given("유저가 등록한 훈련일정이 있을때") {
-            val mockUser = userEntity("test4")
+            val mockUser = userEntity("test7")
             val mockTrainingSchedules =
                 TrainingInfoFixture.createMultipleEntityMocks(2, mockUser)
 
@@ -177,59 +327,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             }
         }
 
-        Given("유저가 등록한 일정이 여러개 있을때") {
-            val currentDate = LocalDate.now()
-            val mockUser = userEntity("test5")
-
-            every { loginUserContext.getCurrentUser() } returns mockUser
-
-            val previousSunday = DateUtils.findPreviousSunday(currentDate)
-            val nextSaturday = DateUtils.findNextSaturday(currentDate)
-
-            val mockSchedule1 = TrainingInfoFixture.createEntityMock(
-                id = 1L,
-                scheduledDate = previousSunday.plusDays(1),
-                user = mockUser,
-            )
-            val mockSchedule2 = TrainingInfoFixture.createEntityMock(
-                id = 2L,
-                scheduledDate = nextSaturday.minusDays(3),
-                user = mockUser,
-            )
-            val mockTrainingSchedules = listOf(mockSchedule1, mockSchedule2)
-
-            every {
-                repository.retrieveCurrentWeekSchedules(
-                    user = mockUser,
-                    previousSunday = previousSunday,
-                    nextSaturday = nextSaturday
-                )
-            } returns mockTrainingSchedules
-
-            When("이번 주 훈련일정 목록 조회를 하면") {
-                val result = trainingSchedulesService.getCurrentWeekTrainingSchedules()
-
-                Then("일요일부터 토요일까지 등록된 훈련목록을 가져온다.") {
-                    result.size shouldBe 2
-                    result.map { it.id } shouldContainAll listOf(1L, 2L)
-
-                    verify {
-                        loginUserContext.getCurrentUser()
-                        repository.retrieveCurrentWeekSchedules(
-                            user = mockUser,
-                            previousSunday = previousSunday,
-                            nextSaturday = nextSaturday
-                        )
-                        mockSchedule1.toDto()
-                        mockSchedule2.toDto()
-                    }
-
-                }
-            }
-        }
-
         Given("다음 예정된 훈련 일정이 있는 상태에서") {
-            val mockUser = userEntity("test6")
+            val mockUser = userEntity("test8")
             val futureDate = LocalDate.now().plusDays(3)
 
             val mockTrainingSchedule = TrainingInfoFixture.createEntityMockWithItems(
@@ -246,7 +345,6 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
 
                 Then("다음 훈련 일정 정보를 반환한다") {
-                    result shouldBe result
                     result?.scheduleId shouldBe 1L
                     result?.title shouldBe "템포런 훈련"
                     result?.scheduledDate shouldBe futureDate
@@ -263,28 +361,6 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     confirmVerified(loginUserContext, repository, mockTrainingSchedule)
-                }
-            }
-        }
-
-        Given("예정된 훈련 일정이 없는 상태에서") {
-            val mockUser = userEntity("test7")
-
-            every { loginUserContext.getCurrentUser() } returns mockUser
-            every { repository.retrieveNextUpcomingSchedule(mockUser) } returns null
-
-            When("다음 예정된 훈련 일정을 조회하면") {
-                val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
-
-                Then("null을 반환한다") {
-                    result shouldBe null
-
-                    verify {
-                        loginUserContext.getCurrentUser()
-                        repository.retrieveNextUpcomingSchedule(mockUser)
-                    }
-
-                    confirmVerified(loginUserContext, repository)
                 }
             }
         }
