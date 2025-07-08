@@ -169,7 +169,8 @@ class TrainingSchedulesServiceImpl(
 
     private fun validateTotalDistance(groups: List<SaveTrainingGroup>) {
         val totalDistance = groups.flatMap { it.items }
-            .sumOf { it.targetDistance ?: 0.0 }
+            .mapNotNull { it.targetDistance }
+            .sum()
 
         if (totalDistance > MAX_TRAINING_DISTANCE) {
             throw TrainingException(TrainingExceptionType.TRAINING_DISTANCE_LIMIT_EXCEEDED)
