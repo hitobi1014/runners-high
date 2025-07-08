@@ -1,11 +1,9 @@
 package io.runnershigh.backend.training.mapper
 
+import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.entity.TrainingPlanItems
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.dto.request.SaveTrainingPlanItem
 
-fun SaveTrainingPlanItem.toEntity(schedule: TrainingSchedules) = TrainingPlanItems(
-    schedule = schedule,
+fun SaveTrainingItem.toEntity() = TrainingPlanItems(
     itemOrder = this.itemOrder,
     targetType = this.targetType,
     targetMinPace = this.targetMinPace,

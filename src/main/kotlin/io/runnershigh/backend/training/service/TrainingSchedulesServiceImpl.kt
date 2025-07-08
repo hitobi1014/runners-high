@@ -1,16 +1,20 @@
 package io.runnershigh.backend.training.service
 
 import io.runnershigh.backend.shared.util.DateUtils
-import io.runnershigh.backend.training.dto.request.SaveTrainingSchedule
+import io.runnershigh.backend.training.dto.request.SaveTrainingGroup
+import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
+import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.entity.TrainingPlanGroups
+import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.extension.calculateTotalDistanceAndTime
 import io.runnershigh.backend.training.mapper.toDto
-import io.runnershigh.backend.training.mapper.toEntity
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +23,7 @@ import java.time.ZoneId
 
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 class TrainingSchedulesServiceImpl(
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
     private val loginUserContext: LoginUserContext,
@@ -27,13 +31,38 @@ class TrainingSchedulesServiceImpl(
 
     companion object {
         private const val MAX_FUTURE_DAYS = 365L
+        private const val MAX_TRAINING_DISTANCE = 100.0
     }
 
-    override fun createTrainingSchedule(dto: SaveTrainingSchedule): TrainingSchedules {
-        // step01. 훈련일자 값 검증 -> 훈련일자가 현재보다 이전일 수 없음
-        validateTrainingTime(dto.scheduledDate)
+    @Transactional
+    override fun createTrainingSchedule(dto: SaveTrainingInfo): TrainingSchedules {
+        /*
+        DTO 값 검증
+        1. 권한 검증
+            - 현재 로그인 유저 확인
+        2. 데이터 정합성 검증
+            - 훈련 등록 날짜가 최대 1년 이내인지
+            - 그룹 순서가 연속적인지 (1,2,3 ...)
+            - 아이템 순서가 연속적인지
+            - 페이스 값들이 논리적으로 올바른지
+        3. 비즈니스 룰 검증
+            - 거리/시간 제한 (최대 100km)
+         */
 
-        return trainingSchedulesRepository.save(dto.toEntity(loginUserContext.getCurrentUser()))
+        // #1. 권한 검증
+        val loginUser = loginUserContext.getCurrentUser()
+
+        // #2. DTO 값 검증 - 데이터 정합성
+        validateTrainingTime(dto.scheduledDate)
+        validateGroupOrder(dto.groups)
+        validateItemOrder(dto.groups)
+        validatePaceRange(dto.groups)
+        validateTotalDistance(dto.groups)
+
+        // #3. DTO → 엔티티 변환 및 저장
+        val schedule = createTrainingScheduleEntity(dto, loginUser)
+
+        return trainingSchedulesRepository.save(schedule)
     }
 
     override fun getTrainingSchedules(): List<ReadTrainingSchedule> {
@@ -73,7 +102,9 @@ class TrainingSchedulesServiceImpl(
             ?: return null
 
         // #3. 엔티티 -> Schedule 변환
-        val (totalDistance, totalTime) = trainingSchedule.items.calculateTotalDistanceAndTime()
+
+        val allItems = trainingSchedule.groups.flatMap { it.items }
+        val (totalDistance, totalTime) = allItems.calculateTotalDistanceAndTime()
 
         return NextTrainingSchedule(
             scheduleId = trainingSchedule.id,
@@ -87,12 +118,136 @@ class TrainingSchedulesServiceImpl(
     private fun validateTrainingTime(schedule: LocalDate) {
         val now = LocalDate.now(ZoneId.of("Asia/Seoul"))
 
-        if (schedule.isBefore(now)) {
-            throw TrainingException(TrainingExceptionType.CANNOT_REGISTER_PAST_TRAINING)
-        }
-
         if (schedule.isAfter(now.plusDays(MAX_FUTURE_DAYS))) {
             throw TrainingException(TrainingExceptionType.CANNOT_REGISTER_TRAINING_BEYOND_ONE_YEAR)
         }
+    }
+
+    /**
+     * 그룹 순서가 순차적으로 맞는지 검증
+     * ex) 1 -> 2-> 3
+     */
+    private fun validateGroupOrder(groups: List<SaveTrainingGroup>) {
+        val orders = groups.map { it.groupOrder }.sorted()
+        val expectedOrders = (1..groups.size).toList()
+
+        if (orders != expectedOrders) {
+            throw TrainingException(TrainingExceptionType.INVALID_GROUP_ORDER)
+        }
+    }
+
+    /**
+     * 아이템 순서가 순차적으로 되어있는지 검증
+     * ex) 1->2->3
+     */
+    private fun validateItemOrder(groups: List<SaveTrainingGroup>) {
+        groups.forEach { group ->
+            val itemOrders = group.items.map { it.itemOrder }.sorted()
+            val expectedOrders = (1..group.items.size).toList()
+
+            if (itemOrders != expectedOrders) {
+                throw TrainingException(TrainingExceptionType.INVALID_ITEM_ORDER)
+            }
+        }
+    }
+
+    /**
+     * 평균 페이스가 적정한 값으로 만들어졌는지 검증
+     * 평균 페이스 > 최소 페이스 && 평균 페이스 < 최대 페이스
+     */
+    private fun validatePaceRange(groups: List<SaveTrainingGroup>) {
+        groups.flatMap { it.items }.forEach { item ->
+            val min = item.targetMinPace
+            val avg = item.targetAvgPace
+            val max = item.targetMaxPace
+
+            if (min > avg || avg > max) {
+                throw TrainingException(TrainingExceptionType.INVALID_PACE_RANGE)
+            }
+        }
+    }
+
+    private fun validateTotalDistance(groups: List<SaveTrainingGroup>) {
+        val totalDistance = groups.flatMap { it.items }
+            .mapNotNull { it.targetDistance }
+            .sum()
+
+        if (totalDistance > MAX_TRAINING_DISTANCE) {
+            throw TrainingException(TrainingExceptionType.TRAINING_DISTANCE_LIMIT_EXCEEDED)
+        }
+    }
+
+    /**
+     * DTO를 TrainingSchedules 엔티티로 변환
+     * Groups와 Items까지 함께 변환하여 Cascade로 한번에 저장
+     */
+    private fun createTrainingScheduleEntity(
+        dto: SaveTrainingInfo,
+        user: UserEntity,
+    ): TrainingSchedules {
+        val schedule = TrainingSchedules(
+            user = user,
+            title = dto.title,
+            location = dto.location,
+            scheduledDate = dto.scheduledDate,
+            description = dto.description,
+            status = dto.status,
+            color = dto.color
+        )
+
+        // Groups 변환 및 연관관계 설정
+        dto.groups.forEach { groupDto ->
+            val group = createTrainingGroupEntity(groupDto, schedule)
+            schedule.groups.add(group)
+        }
+
+        return schedule
+    }
+
+    /**
+     * SaveTrainingGroup DTO를 TrainingPlanGroups 엔티티로 변환
+     */
+    private fun createTrainingGroupEntity(
+        dto: SaveTrainingGroup,
+        schedule: TrainingSchedules,
+    ): TrainingPlanGroups {
+        val group = TrainingPlanGroups(
+            schedule = schedule,
+            groupOrder = dto.groupOrder,
+            repeatCount = dto.repeatCount,
+            description = dto.description
+        )
+
+        // Items 변환 및 연관관계 설정
+        dto.items.forEach { itemDto ->
+            val item = createTrainingItemEntity(itemDto, group)
+            group.items.add(item)
+        }
+
+        return group
+    }
+
+    /**
+     * SaveTrainingItem DTO를 TrainingPlanItems 엔티티로 변환
+     */
+    private fun createTrainingItemEntity(
+        dto: SaveTrainingItem,
+        group: TrainingPlanGroups,
+    ): TrainingPlanItems {
+        return TrainingPlanItems(
+            group = group,
+            itemOrder = dto.itemOrder,
+            targetType = dto.targetType,
+            targetMinPace = dto.targetMinPace,
+            targetMaxPace = dto.targetMaxPace,
+            targetAvgPace = dto.targetAvgPace,
+            runningTypeCode = dto.runningTypeCode,
+            distanceUnit = dto.distanceUnit,
+            targetDistance = dto.targetDistance,
+            targetTime = dto.targetTime,
+            estimatedDistance = dto.estimatedDistance,
+            estimatedTime = dto.estimatedTime,
+            note = dto.note
+        )
     }
 }

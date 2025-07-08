@@ -5,6 +5,7 @@ import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.entity.enum.DistanceUnit
 import io.runnershigh.backend.training.entity.enum.TargetType
+import io.runnershigh.backend.training.entity.enum.TrainingColor
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
@@ -79,19 +80,20 @@ class DataInitializer(
 
     private fun initTrainingPlanItems() {
         val user = getUserByLoginId()
-        // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전 
+        // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전
         val trainingSchedules = createSchedule2(user, LocalDate.now().plusDays(1))
         trainingSchedulesRepository.save(trainingSchedules)
         trainingSchedulesRepository.flush()
 
-        val planItem1 =
-            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 1)
-        val planItem2 =
-            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 2)
-        val planItem3 =
-            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 3)
+        // TODO 250705) 훈련일정 items가 가지고있을 필요 x, 테스트 후 삭제
+//        val planItem1 =
+//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 1)
+//        val planItem2 =
+//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 2)
+//        val planItem3 =
+//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 3)
 
-        trainingPlanItemsRepository.saveAll(listOf(planItem1, planItem2, planItem3))
+//        trainingPlanItemsRepository.saveAll(listOf(planItem1, planItem2, planItem3))
         trainingPlanItemsRepository.flush()
     }
 
@@ -124,7 +126,7 @@ class DataInitializer(
             location = faker.address().streetAddress(),
             scheduledDate = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
                 .toLocalDate(),
-            color = faker.color().hex(),
+            color = TrainingColor.entries.toTypedArray().random(),
             description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
         )
@@ -139,7 +141,7 @@ class DataInitializer(
             title = faker.lorem().characters(10, 100),
             location = faker.address().streetAddress(),
             scheduledDate = scheduleDate,
-            color = faker.color().hex(),
+            color = TrainingColor.entries.toTypedArray().random(),
             description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
         )
@@ -164,7 +166,6 @@ class DataInitializer(
     }
 
     private fun createTrainingPlanItems(
-        schedule: TrainingSchedules,
         itemOrder: Int = faker.number().numberBetween(1, 10),
         targetType: TargetType = faker.options().option(TargetType::class.java),
         targetMinPace: LocalTime = LocalTime.of(
@@ -194,7 +195,6 @@ class DataInitializer(
         note: String = faker.lorem().sentence(faker.number().numberBetween(5, 20)),
     ): TrainingPlanItems {
         return TrainingPlanItems(
-            schedule = schedule,
             itemOrder = itemOrder,
             targetType = targetType,
             targetMinPace = targetMinPace,

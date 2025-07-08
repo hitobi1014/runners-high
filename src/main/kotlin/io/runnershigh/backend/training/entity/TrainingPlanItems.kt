@@ -15,10 +15,6 @@ class TrainingPlanItems(
     val id: Long = 0L,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schedule_id")
-    val schedule: TrainingSchedules,
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = true)
     val group: TrainingPlanGroups? = null,
 

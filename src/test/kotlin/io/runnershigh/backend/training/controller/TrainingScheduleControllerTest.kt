@@ -1,15 +1,14 @@
 package io.runnershigh.backend.training.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import io.runnershigh.backend.fixture.training.TrainingInfoFixture
 import io.runnershigh.backend.shared.response.CommonResponseMessage
 import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
-import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
-import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
@@ -19,9 +18,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDate
-import java.time.LocalTime
 
 @WebMvcTest(
     controllers = [TrainingScheduleController::class],
@@ -32,12 +31,13 @@ import java.time.LocalTime
 class TrainingScheduleControllerTest(
     @Autowired private val mockMvc: MockMvc,
     @MockkBean private val trainingScheduleUseCase: TrainingSchedulesServiceImpl,
+    @Autowired private val objectMapper: ObjectMapper,
 ) : BehaviorSpec({
 
     val baseUrl = "/api/training-schedule"
 
     Given("다음 훈련 일정이 있는 상태에서") {
-        val mockSchedule = createNextTrainingSchedule()
+        val mockSchedule = TrainingInfoFixture.createNextTrainingSchedule()
 
         every { trainingScheduleUseCase.getNextUpcomingTrainingSchedule() } returns mockSchedule
 
@@ -59,13 +59,12 @@ class TrainingScheduleControllerTest(
     }
 
     Given("이번 주 훈련 일정이 있는 상태에서") {
-        val mockSchedule1 = createTrainingSchedule()
-        val mockSchedule2 = createTrainingSchedule(
-            id = 2L,
-            title = "보라매 공원 템포런",
+        val mockSchedule1 = TrainingInfoFixture.createReadTrainingSchedule()
+        val mockSchedule2 = TrainingInfoFixture.createReadTrainingSchedule(
+            id = 2L, title = "보라매 공원 템포런",
             scheduledDate = LocalDate.now().plusDays(1)
         )
-        val mockSchedule3 = createTrainingSchedule(
+        val mockSchedule3 = TrainingInfoFixture.createReadTrainingSchedule(
             id = 3L,
             title = "남산 업힐",
             scheduledDate = LocalDate.now().plusDays(3)
@@ -94,36 +93,53 @@ class TrainingScheduleControllerTest(
         }
     }
 
+    Given("훈련 일정 저장 요청이 들어왔을 때") {
+        val saveDto = TrainingInfoFixture.createSaveTrainingInfo(
+            title = "템포런 훈련",
+            location = "올림픽 공원",
+            scheduledDate = LocalDate.now().plusDays(3)
+        )
+        val mockTrainingSchedule = TrainingInfoFixture.createDefault()
+
+        every { trainingScheduleUseCase.createTrainingSchedule(any()) } returns mockTrainingSchedule
+
+        When("유효한 훈련 일정 데이터로 저장 API를 호출하면") {
+            Then("성공적으로 훈련 일정이 저장된다") {
+                mockMvc.perform(
+                    post(baseUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.message").value(CommonResponseMessage.SUCCESS_CREATE_DATA.message))
+
+                verify(exactly = 1) { trainingScheduleUseCase.createTrainingSchedule(any()) }
+            }
+        }
+    }
+
+    Given("유효하지 않은 훈련 일정 저장 요청이 들어왔을 때") {
+        val invalidDto = mapOf(
+            "title" to "",  // 제목이 비어있음
+            "scheduledDate" to "2024-01-01",  // 과거 날짜
+            "color" to "MINT",
+            "groups" to emptyList<Any>()  // 그룹이 비어있음
+        )
+
+        When("유효하지 않은 데이터로 저장 API를 호출하면") {
+            Then("400 Bad Request 에러가 발생한다") {
+                mockMvc.perform(
+                    post(baseUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto))
+                )
+                    .andExpect(status().isBadRequest)
+
+                verify(exactly = 0) { trainingScheduleUseCase.createTrainingSchedule(any()) }
+            }
+        }
+    }
+
 })
-
-private fun createTrainingSchedule(
-    id: Long = 1L,
-    title: String = "올림픽 공원 펀런",
-    location: String = "올림픽 공원",
-    scheduledDate: LocalDate = LocalDate.now(),
-    description: String = "즐겁게 뛰기",
-    status: TrainingStatus = TrainingStatus.PLANNED,
-    color: String = "#ff0000",
-) = ReadTrainingSchedule(
-    id = id,
-    title = title,
-    location = location,
-    scheduledDate = scheduledDate,
-    description = description,
-    status = status,
-    color = color
-)
-
-private fun createNextTrainingSchedule(
-    scheduleId: Long = 1L,
-    title: String = "올림픽 공원 펀런",
-    scheduledDate: LocalDate = LocalDate.now(),
-    totalDistance: Double = 10.0,
-    totalTime: LocalTime = LocalTime.of(0, 50)
-) = NextTrainingSchedule(
-    scheduleId = scheduleId,
-    title = title,
-    scheduledDate = scheduledDate,
-    totalDistance = totalDistance,
-    totalTime = totalTime
-)
