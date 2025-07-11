@@ -44,6 +44,21 @@ class TrainingScheduleRepositoryCustomImpl(
             .fetchFirst()
     }
 
+    override fun findThisWeekTrainingSchedules(
+        user: UserEntity,
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): List<TrainingSchedules> {
+        return queryFactory.selectFrom(trainingSchedules)
+            .where(
+                eqUser(user),
+                betweenScheduleDate(startDate, endDate)
+            )
+            .fetch()
+    }
+
+    private fun betweenScheduleDate(startDate: LocalDate, endDate: LocalDate): BooleanExpression? =
+        trainingSchedules.scheduledDate.between(startDate, endDate)
 
     private fun betweenSundayAndSaturday(
         beforeSunday: LocalDate,

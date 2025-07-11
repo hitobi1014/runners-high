@@ -6,6 +6,7 @@ import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
 import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
@@ -19,6 +20,7 @@ import io.runnershigh.backend.user.util.LoginUserContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 
@@ -113,6 +115,26 @@ class TrainingSchedulesServiceImpl(
             totalDistance = totalDistance,
             totalTime = totalTime
         )
+    }
+
+    override fun getSummaryThisWeekForSchedule(user: UserEntity): SummaryThisWeekSchedule {
+        val loginUser = loginUserContext.getCurrentUser()
+
+        val startDate = DateUtils.findPreviousMonday()
+        val endDate = DateUtils.findNextSunday()
+
+        val weekTrainingSchedules =
+            trainingSchedulesRepository.findThisWeekTrainingSchedules(loginUser, startDate, endDate)
+        val items = weekTrainingSchedules.flatMap { it.groups }.flatMap { it.items }
+        /*
+        일정 수 count
+        예상거리 sum
+        예상 시간 sum
+         */
+        val scheduleCount = weekTrainingSchedules.size
+        val totalDistance = items.sumOf { it.estimatedDistance ?: 0.0 }
+
+        TODO()
     }
 
     private fun validateTrainingTime(schedule: LocalDate) {
