@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.runnershigh.backend.fixture.training.TrainingInfoFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.shared.response.CommonResponseMessage
 import io.runnershigh.backend.training.service.TrainingSchedulesServiceImpl
 import org.junit.jupiter.api.extension.ExtendWith
@@ -138,6 +139,29 @@ class TrainingScheduleControllerTest(
                     .andExpect(status().isBadRequest)
 
                 verify(exactly = 0) { trainingScheduleUseCase.createTrainingSchedule(any()) }
+            }
+        }
+    }
+
+    Given("이번 주 훈련 요약 정보를 조회할 때") {
+        val mockSummary = TrainingScheduleFixture.createMockSummaryThisWeekSchedule()
+
+        every { trainingScheduleUseCase.getSummaryThisWeekForSchedule() } returns mockSummary
+
+        When("주간 훈련 요약 API를 호출하면") {
+            Then("성공적으로 요약 정보가 반환된다") {
+                mockMvc.perform(
+                    get("$baseUrl/current-week/summary")
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.message").value(CommonResponseMessage.SUCCESS_GET_DATA.message))
+                    .andExpect(jsonPath("$.data.scheduleCount").value(mockSummary.scheduleCount))
+                    .andExpect(jsonPath("$.data.totalDistance").value(mockSummary.totalDistance))
+                    .andExpect(jsonPath("$.data.totalTime").value(mockSummary.totalTime.toString()))
+
+                verify(exactly = 1) { trainingScheduleUseCase.getSummaryThisWeekForSchedule() }
             }
         }
     }

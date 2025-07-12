@@ -6,6 +6,7 @@ import io.runnershigh.backend.shared.response.ResponseUtils
 import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
+import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
 import io.runnershigh.backend.training.service.TrainingSchedulesService
 import jakarta.validation.Valid
 import mu.KotlinLogging
@@ -52,5 +53,11 @@ class TrainingScheduleController(
         return ResponseUtils.success(Unit, CommonResponseMessage.SUCCESS_CREATE_DATA.message)
     }
 
-
+    // 이번 주 훈련 요약 조회
+    @GetMapping("/current-week/summary")
+    fun getCurrentWeekTrainingScheduleSummary(): ResponseEntity<ApiResponse<SummaryThisWeekSchedule>> {
+        val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+        return ResponseUtils.success(result, CommonResponseMessage.SUCCESS_GET_DATA.message)
+    }
+    
 }
