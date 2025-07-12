@@ -6,8 +6,8 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.runnershigh.backend.user.dto.request.SignupRequest
-import io.runnershigh.backend.user.entity.enum.AgeGroup
-import io.runnershigh.backend.user.entity.enum.Gender
+import io.runnershigh.backend.user.entity.AgeGroup
+import io.runnershigh.backend.user.entity.Gender
 import io.runnershigh.backend.user.service.UserService
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,17 +1,12 @@
 package io.runnershigh.backend.init
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
-import io.runnershigh.backend.training.entity.TrainingPlanItems
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingColor
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.user.entity.AgeGroup
+import io.runnershigh.backend.user.entity.Gender
 import io.runnershigh.backend.user.entity.UserEntity
-import io.runnershigh.backend.user.entity.enum.AgeGroup
-import io.runnershigh.backend.user.entity.enum.Gender
 import io.runnershigh.backend.user.repository.UserRepository
 import mu.KotlinLogging
 import net.datafaker.Faker
@@ -21,9 +16,9 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 import java.util.*
 
@@ -83,17 +78,8 @@ class DataInitializer(
         // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전
         val trainingSchedules = createSchedule2(user, LocalDate.now().plusDays(1))
         trainingSchedulesRepository.save(trainingSchedules)
+
         trainingSchedulesRepository.flush()
-
-        // TODO 250705) 훈련일정 items가 가지고있을 필요 x, 테스트 후 삭제
-//        val planItem1 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 1)
-//        val planItem2 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 2)
-//        val planItem3 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 3)
-
-//        trainingPlanItemsRepository.saveAll(listOf(planItem1, planItem2, planItem3))
         trainingPlanItemsRepository.flush()
     }
 
@@ -168,30 +154,18 @@ class DataInitializer(
     private fun createTrainingPlanItems(
         itemOrder: Int = faker.number().numberBetween(1, 10),
         targetType: TargetType = faker.options().option(TargetType::class.java),
-        targetMinPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(4, 6),
-            faker.number().numberBetween(0, 59)
-        ),
-        targetMaxPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(5, 7),
-            faker.number().numberBetween(0, 59)
-        ),
-        targetAvgPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(4, 6),
-            faker.number().numberBetween(30, 59)
-        ),
+        targetMinPace: Duration = Duration.ofMinutes(faker.number().numberBetween(4, 6).toLong())
+            .plusSeconds(faker.number().numberBetween(0, 59).toLong()),
+        targetMaxPace: Duration = Duration.ofMinutes(faker.number().numberBetween(5, 7).toLong())
+            .plusSeconds(faker.number().numberBetween(0, 59).toLong()),
+        targetAvgPace: Duration = Duration.ofMinutes(faker.number().numberBetween(4, 6).toLong())
+            .plusSeconds(faker.number().numberBetween(30, 59).toLong()),
         runningTypeCode: Int = faker.number().numberBetween(1, 5),
         distanceUnit: DistanceUnit = faker.options().option(DistanceUnit::class.java),
         targetDistance: Double = faker.number().randomDouble(1, 1, 20),
-        targetTime: LocalTime = LocalTime.of(
-            faker.number().numberBetween(0, 2),
-            faker.number().numberBetween(0, 59)
-        ),
+        targetTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
         estimatedDistance: Double = faker.number().randomDouble(1, 1, 20),
-        estimatedTime: LocalTime = LocalTime.of(
-            faker.number().numberBetween(0, 2),
-            faker.number().numberBetween(0, 59)
-        ),
+        estimatedTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
         note: String = faker.lorem().sentence(faker.number().numberBetween(5, 20)),
     ): TrainingPlanItems {
         return TrainingPlanItems(

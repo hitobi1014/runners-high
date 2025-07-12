@@ -13,4 +13,10 @@ interface TrainingScheduleRepositoryCustom {
     ): List<TrainingSchedules>
 
     fun retrieveNextUpcomingSchedule(user: UserEntity): TrainingSchedules?
+
+    fun findThisWeekTrainingSchedules(
+        user: UserEntity,
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): List<TrainingSchedules>
 }

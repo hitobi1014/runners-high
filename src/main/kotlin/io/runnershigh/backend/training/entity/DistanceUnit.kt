@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.entity.enum
+package io.runnershigh.backend.training.entity
 
 enum class DistanceUnit(val symbol: String, val conversionFactor: Double) {
     METER("m", 1.0),

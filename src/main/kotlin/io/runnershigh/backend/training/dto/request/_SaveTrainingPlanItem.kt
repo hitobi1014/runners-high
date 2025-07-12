@@ -1,7 +1,7 @@
 //package io.runnershigh.backend.training.dto.request
 //
-//import io.runnershigh.backend.training.entity.enum.DistanceUnit
-//import io.runnershigh.backend.training.entity.enum.TargetType
+//import io.runnershigh.backend.training.entity.DistanceUnit
+//import io.runnershigh.backend.training.entity.TargetType
 //import jakarta.validation.constraints.Min
 //import jakarta.validation.constraints.NotNull
 //import java.time.LocalTime

@@ -5,6 +5,28 @@ import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
 object DateUtils {
+    /**
+     * 주어진 날짜 또는 현재 날짜를 기준으로 가장 가까운 이전 월요일 날짜를 반환합니다.
+     * 현재 날짜가 월요일인 경우 현재 날짜를 반환합니다.
+     *
+     * @param date 기준 날짜 (기본값: 현재 날짜)
+     * @return 가장 가까운 이전 월요일 날짜
+     */
+    fun findPreviousMonday(date: LocalDate = LocalDate.now()): LocalDate {
+        return if (date.dayOfWeek == DayOfWeek.MONDAY) {
+            date
+        } else {
+            date.with(TemporalAdjusters.previous(DayOfWeek.MONDAY))
+        }
+    }
+
+    fun findNextSunday(date: LocalDate = LocalDate.now()): LocalDate {
+        return if (date.dayOfWeek == DayOfWeek.SUNDAY) {
+            date
+        } else {
+            date.with(TemporalAdjusters.next(DayOfWeek.SUNDAY))
+        }
+    }
 
 
     /**
@@ -20,7 +42,6 @@ object DateUtils {
             date.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY))
         }
     }
-
 
     /**
      * 주어진 날짜 또는 현재 날짜를 기준으로 가장 가까운 이후 토요일 날짜를 반환합니다.

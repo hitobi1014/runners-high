@@ -1,8 +1,6 @@
 package io.runnershigh.backend.training.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
-import io.runnershigh.backend.training.entity.enum.TrainingColor
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment

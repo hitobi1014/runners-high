@@ -11,20 +11,21 @@ import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingColor
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.DistanceUnit
+import io.runnershigh.backend.training.entity.TargetType
+import io.runnershigh.backend.training.entity.TrainingColor
+import io.runnershigh.backend.training.entity.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import net.datafaker.Faker
+import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 import java.util.*
 
 object TrainingInfoFixture {
     private val faker = Faker(Locale.KOREA)
 
-    fun createDefault(
+    // ============================================ 엔티티 ============================================
+    fun createTrainingSchedule(
         id: Long = 0,
         user: UserEntity = UserFixture.createDefault(),
         title: String = faker.lorem().characters(5, 20),
@@ -46,6 +47,90 @@ object TrainingInfoFixture {
         )
     }
 
+    fun createEntityMock(
+        id: Long,
+        user: UserEntity,
+        scheduledDate: LocalDate,
+        status: TrainingStatus = TrainingStatus.PLANNED,
+    ): TrainingSchedules {
+        val dto = createReadTrainingSchedule(id, scheduledDate = scheduledDate, status = status)
+
+        return mockk<TrainingSchedules>().apply {
+            every { this@apply.user } returns user
+            every { this@apply.id } returns id
+            every { this@apply.scheduledDate } returns scheduledDate
+            every { this@apply.status } returns status
+            every { this@apply.title } returns dto.title
+            every { this@apply.location } returns dto.location
+            every { this@apply.description } returns dto.description
+            every { this@apply.color } returns dto.color
+        }
+    }
+
+    private fun createMockTrainingPlanItems(): MutableList<TrainingPlanItems> {
+        val item1 = mockk<TrainingPlanItems>().apply {
+            every { id } returns 1L
+            every { targetDistance } returns 5.0
+            every { targetTime } returns Duration.ofMinutes(25)
+            every { targetType } returns TargetType.DISTANCE
+            every { distanceUnit } returns DistanceUnit.KILOMETER
+        }
+
+        val item2 = mockk<TrainingPlanItems>().apply {
+            every { id } returns 2L
+            every { targetDistance } returns 5.0
+            every { targetTime } returns Duration.ofMinutes(25)
+            every { targetType } returns TargetType.DISTANCE
+            every { distanceUnit } returns DistanceUnit.KILOMETER
+        }
+
+        return mutableListOf(item1, item2)
+    }
+
+    private fun createMockTrainingPlanGroups(): MutableList<TrainingPlanGroups> {
+        val mockGroup = mockk<TrainingPlanGroups>()
+        val mockItems = createMockTrainingPlanItems()
+
+        every { mockGroup.id } returns 1L
+        every { mockGroup.items } returns mockItems
+
+        return mutableListOf(mockGroup)
+    }
+
+    fun createEntityMockWithItems(
+        id: Long,
+        title: String = faker.lorem().characters(5, 15),
+        scheduledDate: LocalDate,
+        user: UserEntity,
+        status: TrainingStatus = TrainingStatus.PLANNED,
+    ): TrainingSchedules {
+        val mockSchedule = mockk<TrainingSchedules>()
+        val mockGroups = createMockTrainingPlanGroups()
+
+        every { mockSchedule.id } returns id
+        every { mockSchedule.title } returns title
+        every { mockSchedule.scheduledDate } returns scheduledDate
+        every { mockSchedule.user } returns user
+        every { mockSchedule.status } returns status
+        every { mockSchedule.location } returns faker.location().publicSpace()
+        every { mockSchedule.description } returns faker.lorem().sentence(20)
+        every { mockSchedule.color } returns TrainingColor.entries.toTypedArray().random()
+        every { mockSchedule.groups } returns mockGroups
+
+        return mockSchedule
+    }
+
+    fun createMultipleEntityMocks(count: Int, user: UserEntity): List<TrainingSchedules> {
+        return (1..count).map { index ->
+            createEntityMock(
+                id = index.toLong(),
+                user = user,
+                scheduledDate = LocalDate.now().plusDays(index.toLong() - 1)
+            )
+        }
+    }
+
+    // ============================================ DTO ============================================
     fun createSaveTrainingScheduleList(
         count: Int,
         groupCount: Int = faker.number().numberBetween(1, 3),
@@ -101,17 +186,10 @@ object TrainingInfoFixture {
 
     fun createSaveTrainingItems(count: Int): List<SaveTrainingItem> {
         return (1..count).map { itemIndex ->
-            val minPace = LocalTime.of(
-                0,
-                faker.number().numberBetween(4, 6),
-                faker.number().numberBetween(0, 59)
-            )
-            val maxPace = minPace.plusMinutes(faker.number().numberBetween(10, 30).toLong())
-            val avgPace = LocalTime.of(
-                0,
-                (minPace.minute + maxPace.minute) / 2,
-                (minPace.second + maxPace.second) / 2
-            )
+            val minPace = Duration.ofMinutes(faker.number().numberBetween(7, 15).toLong())
+                .plusSeconds(faker.number().numberBetween(0, 59).toLong())
+            val maxPace = Duration.ofMinutes(faker.number().numberBetween(3, 6).toLong())
+            val avgPace = minPace.plus(maxPace).dividedBy(2)
 
             SaveTrainingItem(
                 itemOrder = itemIndex,
@@ -122,9 +200,9 @@ object TrainingInfoFixture {
                 runningTypeCode = faker.number().numberBetween(1, 10),
                 distanceUnit = DistanceUnit.entries.toTypedArray().random(),
                 targetDistance = faker.number().randomDouble(1, 1, 20),
-                targetTime = LocalTime.of(0, faker.number().numberBetween(20, 60)),
+                targetTime = Duration.ofMinutes(faker.number().numberBetween(20, 60).toLong()),
                 estimatedDistance = faker.number().randomDouble(1, 1, 20),
-                estimatedTime = LocalTime.of(0, faker.number().numberBetween(20, 60)),
+                estimatedTime = Duration.ofMinutes(faker.number().numberBetween(20, 60).toLong()),
                 note = faker.lorem().sentence(5)
             )
         }
@@ -156,7 +234,7 @@ object TrainingInfoFixture {
         scheduledDate: LocalDate = LocalDate.now()
             .plusDays(faker.number().numberBetween(1, 30).toLong()),
         totalDistance: Double = faker.number().randomDouble(1, 1, 20),
-        totalTime: LocalTime = LocalTime.of(0, faker.number().numberBetween(20, 60)),
+        totalTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
     ) = NextTrainingSchedule(
         scheduleId = scheduleId,
         title = title,
@@ -165,111 +243,40 @@ object TrainingInfoFixture {
         totalTime = totalTime
     )
 
+    fun createSaveTrainingPlanItem(
+        itemOrder: Int = faker.number().numberBetween(1, 9),
+        targetType: TargetType = TargetType.entries.toTypedArray().random(),
+        targetMinPace: Duration = Duration.ofMinutes(
+            faker.random().nextLong(8, 15)
+        ),
+        targetMaxPace: Duration = Duration.ofMinutes(
+            faker.random().nextLong(3, 5)
+        ),
+        targetAvgPace: Duration = targetMinPace.plus(targetMaxPace).dividedBy(2),
+        runningTypeCode: Int = 101,
+        distanceUnit: DistanceUnit = DistanceUnit.KILOMETER,
+        targetDistance: Double = faker.number().randomDouble(1, 5, 30),
+        targetTime: Duration = Duration.ofMinutes(
+            faker.random().nextLong(25, 59)
+        ),
+        estimatedDistance: Double = faker.number().randomDouble(1, 5, 30),
+        estimatedTime: Duration = Duration.ofMinutes(
+            faker.random().nextLong(25, 59)
+        ),
+        note: String? = faker.lorem().word(),
+    ) = SaveTrainingItem(
+        itemOrder = itemOrder,
+        targetType = targetType,
+        targetMinPace = targetMinPace,
+        targetMaxPace = targetMaxPace,
+        targetAvgPace = targetAvgPace,
+        runningTypeCode = runningTypeCode,
+        distanceUnit = distanceUnit,
+        targetDistance = targetDistance,
+        targetTime = targetTime,
+        estimatedDistance = estimatedDistance,
+        estimatedTime = estimatedTime,
+        note = note,
+    )
 
-    fun createEntityMock(
-        id: Long,
-        user: UserEntity,
-        scheduledDate: LocalDate,
-        status: TrainingStatus = TrainingStatus.PLANNED,
-    ): TrainingSchedules {
-        val dto = createReadTrainingSchedule(id, scheduledDate = scheduledDate, status = status)
-
-        return mockk<TrainingSchedules>().apply {
-            every { this@apply.user } returns user
-            every { this@apply.id } returns id
-            every { this@apply.scheduledDate } returns scheduledDate
-            every { this@apply.status } returns status
-            every { this@apply.title } returns dto.title
-            every { this@apply.location } returns dto.location
-            every { this@apply.description } returns dto.description
-            every { this@apply.color } returns dto.color
-        }
-    }
-
-    fun createMultipleEntityMocks(count: Int, user: UserEntity): List<TrainingSchedules> {
-        return (1..count).map { index ->
-            createEntityMock(
-                id = index.toLong(),
-                user = user,
-                scheduledDate = LocalDate.now().plusDays(index.toLong() - 1)
-            )
-        }
-    }
-
-    fun createEntityMockWithItems(
-        id: Long,
-        title: String = faker.lorem().characters(5, 15),
-        scheduledDate: LocalDate,
-        user: UserEntity,
-        status: TrainingStatus = TrainingStatus.PLANNED,
-    ): TrainingSchedules {
-        val mockSchedule = mockk<TrainingSchedules>()
-        val mockGroups = createMockTrainingPlanGroups()
-
-        every { mockSchedule.id } returns id
-        every { mockSchedule.title } returns title
-        every { mockSchedule.scheduledDate } returns scheduledDate
-        every { mockSchedule.user } returns user
-        every { mockSchedule.status } returns status
-        every { mockSchedule.location } returns faker.location().publicSpace()
-        every { mockSchedule.description } returns faker.lorem().sentence(20)
-        every { mockSchedule.color } returns TrainingColor.entries.toTypedArray().random()
-        every { mockSchedule.groups } returns mockGroups
-
-        return mockSchedule
-    }
-
-    private fun createMockTrainingPlanGroups(): MutableList<TrainingPlanGroups> {
-        val mockGroup = mockk<TrainingPlanGroups>()
-        val mockItems = createMockTrainingPlanItems()
-
-        every { mockGroup.id } returns 1L
-        every { mockGroup.items } returns mockItems
-
-        return mutableListOf(mockGroup)
-    }
-
-    private fun createMockTrainingPlanItems(): MutableList<TrainingPlanItems> {
-        val item1 = mockk<TrainingPlanItems>().apply {
-            every { id } returns 1L
-            every { targetDistance } returns 5.0
-            every { targetTime } returns LocalTime.of(0, 25)
-            every { targetType } returns TargetType.DISTANCE
-            every { distanceUnit } returns DistanceUnit.KILOMETER
-        }
-
-        val item2 = mockk<TrainingPlanItems>().apply {
-            every { id } returns 2L
-            every { targetDistance } returns 5.0
-            every { targetTime } returns LocalTime.of(0, 25)
-            every { targetType } returns TargetType.DISTANCE
-            every { distanceUnit } returns DistanceUnit.KILOMETER
-        }
-
-        return mutableListOf(item1, item2)
-    }
-
-//    private fun createMockTrainingPlanItems(schedule: TrainingSchedules): MutableList<TrainingPlanItems> {
-//        val mockGroup = mockk<TrainingPlanGroups>()
-//
-//        val item1 = mockk<TrainingPlanItems>().apply {
-//            every { id } returns 1L
-//            every { group } returns mockGroup
-//            every { targetDistance } returns 5.0
-//            every { targetTime } returns LocalTime.of(0, 25)
-//            every { targetType } returns TargetType.DISTANCE
-//            every { distanceUnit } returns DistanceUnit.KILOMETER
-//        }
-//
-//        val item2 = mockk<TrainingPlanItems>().apply {
-//            every { id } returns 2L
-//            every { group } returns mockGroup
-//            every { targetDistance } returns 5.0
-//            every { targetTime } returns LocalTime.of(0, 25)
-//            every { targetType } returns TargetType.DISTANCE
-//            every { distanceUnit } returns DistanceUnit.KILOMETER
-//        }
-//
-//        return mutableListOf(item1, item2)
-//    }
 }

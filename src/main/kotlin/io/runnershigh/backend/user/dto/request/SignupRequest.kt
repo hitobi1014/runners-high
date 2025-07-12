@@ -1,7 +1,7 @@
 package io.runnershigh.backend.user.dto.request
 
-import io.runnershigh.backend.user.entity.enum.AgeGroup
-import io.runnershigh.backend.user.entity.enum.Gender
+import io.runnershigh.backend.user.entity.AgeGroup
+import io.runnershigh.backend.user.entity.Gender
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 

@@ -4,28 +4,24 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.shouldBe
-import io.mockk.clearMocks
-import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.fixture.training.TrainingInfoFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.training.dto.request.SaveTrainingGroup
 import io.runnershigh.backend.training.dto.request.SaveTrainingItem
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 
 
 @ExtendWith(MockKExtension::class)
@@ -34,7 +30,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
     private lateinit var loginUserContext: LoginUserContext
 
     @MockK
-    private lateinit var repository: TrainingSchedulesRepository
+    private lateinit var scheduleRepository: TrainingSchedulesRepository
 
     private lateinit var trainingSchedulesService: TrainingSchedulesService
 
@@ -43,22 +39,22 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
     init {
         beforeSpec {
             trainingSchedulesService =
-                TrainingSchedulesServiceImpl(repository, loginUserContext)
+                TrainingSchedulesServiceImpl(scheduleRepository, loginUserContext)
         }
 
         afterTest {
-            clearMocks(repository, loginUserContext)
+            clearMocks(scheduleRepository, loginUserContext)
             trainingSchedulesService =
-                TrainingSchedulesServiceImpl(repository, loginUserContext)
+                TrainingSchedulesServiceImpl(scheduleRepository, loginUserContext)
         }
 
         Given("유저가 올바른 훈련일정을 만든 상태에서") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo()
             val user = userEntity("test1")
-            val savedSchedule = TrainingInfoFixture.createDefault(user = user)
+            val savedSchedule = TrainingInfoFixture.createTrainingSchedule(user = user)
 
             every { loginUserContext.getCurrentUser() } returns user
-            every { repository.save(any<TrainingSchedules>()) } returns savedSchedule
+            every { scheduleRepository.save(any<TrainingSchedules>()) } returns savedSchedule
 
             When("훈련 생성을 수행하면") {
                 val result = trainingSchedulesService.createTrainingSchedule(dto)
@@ -68,7 +64,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
                     verify(exactly = 1) {
                         loginUserContext.getCurrentUser()
-                        repository.save(match { schedule ->
+                        scheduleRepository.save(match { schedule ->
                             schedule.title == dto.title &&
                                     schedule.location == dto.location &&
                                     schedule.scheduledDate == dto.scheduledDate &&
@@ -78,7 +74,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         })
                     }
 
-                    confirmVerified(loginUserContext, repository)
+                    confirmVerified(loginUserContext, scheduleRepository)
                 }
             }
         }
@@ -114,7 +110,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -131,29 +127,29 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                             SaveTrainingItem(
                                 itemOrder = 1,
                                 targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                targetMinPace = Duration.ofMinutes(4).plusSeconds(30),
+                                targetMaxPace = Duration.ofMinutes(5),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45),
                                 runningTypeCode = 1,
                                 distanceUnit = DistanceUnit.KILOMETER,
                                 targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
+                                targetTime = Duration.ofMinutes(25),
                                 estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
+                                estimatedTime = Duration.ofMinutes(25),
                                 note = "아이템1"
                             ),
                             SaveTrainingItem(
                                 itemOrder = 3, // 2가 아닌 3으로 설정 (순서 오류)
                                 targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                targetMinPace = Duration.ofMinutes(4).plusSeconds(30),
+                                targetMaxPace = Duration.ofMinutes(5),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45),
                                 runningTypeCode = 1,
                                 distanceUnit = DistanceUnit.KILOMETER,
                                 targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
+                                targetTime = Duration.ofMinutes(25),
                                 estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
+                                estimatedTime = Duration.ofMinutes(25),
                                 note = "아이템2"
                             )
                         )
@@ -174,13 +170,13 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
         }
 
-        Given("페이스 범위가 잘못된 훈련 일정을 만들고") {
+        Given("최소페이스가 평균페이스보다 빠른 잘못된 훈련 일정을 만들고") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
                 groups = listOf(
                     SaveTrainingGroup(
@@ -188,20 +184,13 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         repeatCount = 1,
                         description = "그룹1",
                         items = listOf(
-                            SaveTrainingItem(
+                            TrainingInfoFixture.createSaveTrainingPlanItem(
                                 itemOrder = 1,
-                                targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 5, 0), // 최소 페이스가 더 큼
-                                targetMaxPace = LocalTime.of(0, 4, 30),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
-                                runningTypeCode = 1,
-                                distanceUnit = DistanceUnit.KILOMETER,
-                                targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
-                                estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
-                                note = "잘못된 페이스"
-                            )
+                                targetMinPace = Duration.ofMinutes(4)
+                                    .plusSeconds(30), // 최소페이스가 평균보다 빠름 -> 검증실패유도
+                                targetMaxPace = Duration.ofMinutes(3),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45)
+                            ),
                         )
                     )
                 )
@@ -220,13 +209,13 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
         }
 
-        Given("총 거리가 100km를 초과하는 훈련 일정을 만들고") {
+        Given("예상 거리가 100km를 초과하는 훈련 계획을 만들고") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
                 groups = listOf(
                     SaveTrainingGroup(
@@ -234,20 +223,10 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         repeatCount = 1,
                         description = "그룹1",
                         items = listOf(
-                            SaveTrainingItem(
+                            TrainingInfoFixture.createSaveTrainingPlanItem(
                                 itemOrder = 1,
-                                targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
-                                runningTypeCode = 1,
-                                distanceUnit = DistanceUnit.KILOMETER,
-                                targetDistance = 150.0, // 100km 초과
-                                targetTime = LocalTime.of(0, 25),
-                                estimatedDistance = 150.0,
-                                estimatedTime = LocalTime.of(0, 25),
-                                note = "초장거리"
-                            )
+                                estimatedDistance = 101.0
+                            ),
                         )
                     )
                 )
@@ -266,7 +245,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -289,7 +268,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -302,7 +281,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 TrainingInfoFixture.createMultipleEntityMocks(2, mockUser)
 
             every { loginUserContext.getCurrentUser() } returns mockUser
-            every { repository.retrieveTrainingSchedules(mockUser) } returns mockTrainingSchedules
+            every { scheduleRepository.retrieveTrainingSchedules(mockUser) } returns mockTrainingSchedules
 
             When("정상적으로 조회를 성공하면") {
                 val result = trainingSchedulesService.getTrainingSchedules()
@@ -313,14 +292,14 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
                     verify {
                         loginUserContext.getCurrentUser()
-                        repository.retrieveTrainingSchedules(mockUser)
+                        scheduleRepository.retrieveTrainingSchedules(mockUser)
                         mockTrainingSchedules[0].toDto()
                         mockTrainingSchedules[1].toDto()
                     }
 
                     confirmVerified(
                         loginUserContext,
-                        repository,
+                        scheduleRepository,
                         *mockTrainingSchedules.toTypedArray()
                     )
                 }
@@ -339,7 +318,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             )
 
             every { loginUserContext.getCurrentUser() } returns mockUser
-            every { repository.retrieveNextUpcomingSchedule(mockUser) } returns mockTrainingSchedule
+            every { scheduleRepository.retrieveNextUpcomingSchedule(mockUser) } returns mockTrainingSchedule
 
             When("다음 예정된 훈련 일정을 조회하면") {
                 val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
@@ -349,18 +328,128 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     result?.title shouldBe "템포런 훈련"
                     result?.scheduledDate shouldBe futureDate
                     result?.totalDistance shouldBe 10.0
-                    result?.totalTime shouldBe LocalTime.of(0, 50)
+                    result?.totalTime shouldBe Duration.ofMinutes(50)
 
                     verify {
                         loginUserContext.getCurrentUser()
-                        repository.retrieveNextUpcomingSchedule(mockUser)
+                        scheduleRepository.retrieveNextUpcomingSchedule(mockUser)
                         mockTrainingSchedule.id
                         mockTrainingSchedule.title
                         mockTrainingSchedule.scheduledDate
                         mockTrainingSchedule.groups
                     }
 
-                    confirmVerified(loginUserContext, repository, mockTrainingSchedule)
+                    confirmVerified(loginUserContext, scheduleRepository, mockTrainingSchedule)
+                }
+            }
+        }
+
+        Given("이번 주 훈련 요약 API가 호출될때") {
+            val mockUser = mockk<UserEntity>()
+
+            When("이번 주 훈련 일정이 없는 경우") {
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns emptyList()
+
+                Then("모든 값이 0인 요약 정보를 반환한다.") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = 0,
+                        totalDistance = 0.0,
+                        totalTime = Duration.ZERO
+                    )
+                    result shouldBe dto
+
+                    verify { loginUserContext.getCurrentUser() }
+                    verify {
+                        scheduleRepository.findThisWeekTrainingSchedules(
+                            mockUser,
+                            any(),
+                            any()
+                        )
+                    }
+                }
+            }
+
+            When("이번 주 훈련 일정이 여러개 있는 경우") {
+                val mockSchedule1 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 10.0,
+                    estimatedTime = Duration.ofMinutes(50)
+                )
+                val mockSchedule2 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 15.0,
+                    estimatedTime = Duration.ofMinutes(90)
+                )
+                val mockSchedule3 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 5.0,
+                    estimatedTime = Duration.ofMinutes(30)
+                )
+                val scheduleList = listOf(mockSchedule1, mockSchedule2, mockSchedule3)
+
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns scheduleList
+
+                Then("모든 일정의 합계를 반환한다") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = scheduleList.size,
+                        totalDistance = 30.0,
+                        totalTime = Duration.ofMinutes(170)
+                    )
+                    result shouldBe dto
+                }
+            }
+
+            When("훈련 일정에 여러 그룹과 아이템이 있는 경우") {
+                val mockItem1 = mockk<TrainingPlanItems>()
+                val mockItem2 = mockk<TrainingPlanItems>()
+                val mockItem3 = mockk<TrainingPlanItems>()
+
+                every { mockItem1.estimatedDistance } returns 10.0
+                every { mockItem1.estimatedTime } returns Duration.ofMinutes(50)
+                every { mockItem2.estimatedDistance } returns 15.0
+                every { mockItem2.estimatedTime } returns Duration.ofMinutes(90)
+                every { mockItem3.estimatedDistance } returns 5.0
+                every { mockItem3.estimatedTime } returns Duration.ofMinutes(30)
+
+                val mockGroup1 = mockk<TrainingPlanGroups>()
+                val mockGroup2 = mockk<TrainingPlanGroups>()
+
+                every { mockGroup1.items } returns mutableListOf(mockItem1, mockItem2)
+                every { mockGroup2.items } returns mutableListOf(mockItem3)
+
+                val mockSchedule = mockk<TrainingSchedules>()
+                every { mockSchedule.groups } returns mutableListOf(mockGroup1, mockGroup2)
+
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns listOf(mockSchedule)
+
+                Then("모든 일정의 합계를 반환한다") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = 1,
+                        totalDistance = 30.0,
+                        totalTime = Duration.ofMinutes(170)
+                    )
+                    result shouldBe dto
                 }
             }
         }

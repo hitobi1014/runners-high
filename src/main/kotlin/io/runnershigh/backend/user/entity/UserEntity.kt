@@ -1,9 +1,6 @@
 package io.runnershigh.backend.user.entity
 
 import io.runnershigh.backend.shared.entity.BaseEntity
-import io.runnershigh.backend.user.entity.enum.AgeGroup
-import io.runnershigh.backend.user.entity.enum.Gender
-import io.runnershigh.backend.user.entity.enum.UserStatus
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
 
