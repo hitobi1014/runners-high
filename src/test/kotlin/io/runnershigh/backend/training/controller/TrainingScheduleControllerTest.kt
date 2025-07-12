@@ -99,7 +99,7 @@ class TrainingScheduleControllerTest(
             location = "올림픽 공원",
             scheduledDate = LocalDate.now().plusDays(3)
         )
-        val mockTrainingSchedule = TrainingInfoFixture.createDefault()
+        val mockTrainingSchedule = TrainingInfoFixture.createTrainingSchedule()
 
         every { trainingScheduleUseCase.createTrainingSchedule(any()) } returns mockTrainingSchedule
 

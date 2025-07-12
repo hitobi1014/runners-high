@@ -5,7 +5,7 @@ import io.runnershigh.backend.training.entity.enum.DistanceUnit
 import io.runnershigh.backend.training.entity.enum.TargetType
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
-import java.time.LocalTime
+import java.time.Duration
 
 @Entity
 @Table(name = "training_items")
@@ -24,36 +24,35 @@ class TrainingPlanItems(
     @Comment("훈련 목표")
     var targetType: TargetType,
 
-    @Temporal(TemporalType.TIME)
     @Comment("목표 최소 페이스")
-    val targetMinPace: LocalTime,
+    val targetMinPace: Duration,
 
-    @Temporal(TemporalType.TIME)
     @Comment("목표 최대 페이스")
-    val targetMaxPace: LocalTime,
+    val targetMaxPace: Duration,
 
-    @Temporal(TemporalType.TIME)
     @Comment("목표 평균 페이스")
-    var targetAvgPace: LocalTime,
+    var targetAvgPace: Duration,
 
     @Comment("러닝타입코드")
     var runningTypeCode: Int,
 
     @Comment("거리 단위")
     @Enumerated(EnumType.STRING)
-    var distanceUnit: DistanceUnit?,
+    var distanceUnit: DistanceUnit,
 
     @Comment("목표 거리")
-    var targetDistance: Double?,
+    var targetDistance: Double,
 
     @Comment("목표 시간")
-    var targetTime: LocalTime?,
+    var targetTime: Duration,
 
+    // 훈련타입이 시간일때, 목표시간과 목표페이스를 기준으로 프론트에서 예상 거리 산출
     @Comment("예상 거리")
-    var estimatedDistance: Double?,
+    var estimatedDistance: Double,
 
+    // 훈련타입이 거리일때, 목표거리와 목표페이스를 기준으로 프론트에서 예상 시간 산출
     @Comment("예상 시간")
-    var estimatedTime: LocalTime?,
+    var estimatedTime: Duration,
 
     @Comment("메모")
     @Lob

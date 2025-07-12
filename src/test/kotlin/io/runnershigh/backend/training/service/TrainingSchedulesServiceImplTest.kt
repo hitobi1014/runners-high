@@ -24,8 +24,8 @@ import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 
 
 @ExtendWith(MockKExtension::class)
@@ -55,7 +55,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
         Given("유저가 올바른 훈련일정을 만든 상태에서") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo()
             val user = userEntity("test1")
-            val savedSchedule = TrainingInfoFixture.createDefault(user = user)
+            val savedSchedule = TrainingInfoFixture.createTrainingSchedule(user = user)
 
             every { loginUserContext.getCurrentUser() } returns user
             every { repository.save(any<TrainingSchedules>()) } returns savedSchedule
@@ -131,29 +131,29 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                             SaveTrainingItem(
                                 itemOrder = 1,
                                 targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                targetMinPace = Duration.ofMinutes(4).plusSeconds(30),
+                                targetMaxPace = Duration.ofMinutes(5),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45),
                                 runningTypeCode = 1,
                                 distanceUnit = DistanceUnit.KILOMETER,
                                 targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
+                                targetTime = Duration.ofMinutes(25),
                                 estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
+                                estimatedTime = Duration.ofMinutes(25),
                                 note = "아이템1"
                             ),
                             SaveTrainingItem(
                                 itemOrder = 3, // 2가 아닌 3으로 설정 (순서 오류)
                                 targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
+                                targetMinPace = Duration.ofMinutes(4).plusSeconds(30),
+                                targetMaxPace = Duration.ofMinutes(5),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45),
                                 runningTypeCode = 1,
                                 distanceUnit = DistanceUnit.KILOMETER,
                                 targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
+                                targetTime = Duration.ofMinutes(25),
                                 estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
+                                estimatedTime = Duration.ofMinutes(25),
                                 note = "아이템2"
                             )
                         )
@@ -180,7 +180,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             }
         }
 
-        Given("페이스 범위가 잘못된 훈련 일정을 만들고") {
+        Given("최소페이스가 평균페이스보다 빠른 잘못된 훈련 일정을 만들고") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
                 groups = listOf(
                     SaveTrainingGroup(
@@ -188,20 +188,13 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         repeatCount = 1,
                         description = "그룹1",
                         items = listOf(
-                            SaveTrainingItem(
+                            TrainingInfoFixture.createSaveTrainingPlanItem(
                                 itemOrder = 1,
-                                targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 5, 0), // 최소 페이스가 더 큼
-                                targetMaxPace = LocalTime.of(0, 4, 30),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
-                                runningTypeCode = 1,
-                                distanceUnit = DistanceUnit.KILOMETER,
-                                targetDistance = 5.0,
-                                targetTime = LocalTime.of(0, 25),
-                                estimatedDistance = 5.0,
-                                estimatedTime = LocalTime.of(0, 25),
-                                note = "잘못된 페이스"
-                            )
+                                targetMinPace = Duration.ofMinutes(4)
+                                    .plusSeconds(30), // 최소페이스가 평균보다 빠름 -> 검증실패유도
+                                targetMaxPace = Duration.ofMinutes(3),
+                                targetAvgPace = Duration.ofMinutes(4).plusSeconds(45)
+                            ),
                         )
                     )
                 )
@@ -226,7 +219,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             }
         }
 
-        Given("총 거리가 100km를 초과하는 훈련 일정을 만들고") {
+        Given("예상 거리가 100km를 초과하는 훈련 계획을 만들고") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
                 groups = listOf(
                     SaveTrainingGroup(
@@ -234,20 +227,10 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         repeatCount = 1,
                         description = "그룹1",
                         items = listOf(
-                            SaveTrainingItem(
+                            TrainingInfoFixture.createSaveTrainingPlanItem(
                                 itemOrder = 1,
-                                targetType = TargetType.DISTANCE,
-                                targetMinPace = LocalTime.of(0, 4, 30),
-                                targetMaxPace = LocalTime.of(0, 5, 0),
-                                targetAvgPace = LocalTime.of(0, 4, 45),
-                                runningTypeCode = 1,
-                                distanceUnit = DistanceUnit.KILOMETER,
-                                targetDistance = 150.0, // 100km 초과
-                                targetTime = LocalTime.of(0, 25),
-                                estimatedDistance = 150.0,
-                                estimatedTime = LocalTime.of(0, 25),
-                                note = "초장거리"
-                            )
+                                estimatedDistance = 101.0
+                            ),
                         )
                     )
                 )
@@ -349,7 +332,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     result?.title shouldBe "템포런 훈련"
                     result?.scheduledDate shouldBe futureDate
                     result?.totalDistance shouldBe 10.0
-                    result?.totalTime shouldBe LocalTime.of(0, 50)
+                    result?.totalTime shouldBe Duration.ofMinutes(50)
 
                     verify {
                         loginUserContext.getCurrentUser()

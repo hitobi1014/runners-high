@@ -12,9 +12,9 @@ object UserFixture {
 
     fun createDefault(
         id: Int = 0,
-        loginId: String = faker.internet().uuid(),
+        loginId: String = faker.internet().uuid().take(30),
         password: String = faker.internet().password(),
-        nickname: String = faker.funnyName().name(),
+        nickname: String = faker.funnyName().name().take(20),
         gender: Gender = Gender.MALE,
         profileImage: String = "",
         ageGroup: AgeGroup = AgeGroup.TWENTIES,

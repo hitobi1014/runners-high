@@ -6,8 +6,8 @@ import io.runnershigh.backend.training.entity.enum.TrainingColor
 import io.runnershigh.backend.training.entity.enum.TrainingStatus
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
+import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 
 data class SaveTrainingInfo(
     @field:NotBlank(message = "제목은 필수입니다.")
@@ -42,19 +42,19 @@ data class SaveTrainingItem(
     @field:NotNull(message = "목표 타입은 필수입니다.")
     val targetType: TargetType,
     @field:NotNull(message = "목표 최소 페이스는 필수입니다.")
-    val targetMinPace: LocalTime,
+    val targetMinPace: Duration,
     @field:NotNull(message = "목표 최대 페이스는 필수입니다.")
-    val targetMaxPace: LocalTime,
+    val targetMaxPace: Duration,
     @field:NotNull(message = "목표 평균 페이스는 필수입니다.")
-    val targetAvgPace: LocalTime,
+    val targetAvgPace: Duration,
     @field:NotNull(message = "러닝 타입 코드는 필수입니다.")
     val runningTypeCode: Int,
-    val distanceUnit: DistanceUnit?,
+    val distanceUnit: DistanceUnit,
     @field:DecimalMin(value = "0.0", inclusive = false, message = "목표 거리는 0보다 커야 합니다.")
-    val targetDistance: Double?,
-    val targetTime: LocalTime?,
+    val targetDistance: Double,
+    val targetTime: Duration,
     @field:DecimalMin(value = "0.0", inclusive = false, message = "예상 거리는 0보다 커야 합니다.")
-    val estimatedDistance: Double?,
-    val estimatedTime: LocalTime?,
+    val estimatedDistance: Double,
+    val estimatedTime: Duration,
     val note: String?,
 )

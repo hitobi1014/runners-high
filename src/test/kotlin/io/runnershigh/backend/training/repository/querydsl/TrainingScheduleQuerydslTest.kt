@@ -25,7 +25,7 @@ class TrainingScheduleQuerydslTest : BehaviorSpec() {
         val user = UserFixture.createDefault(loginId = "test1")
         testEntityManager.persist(user)
 
-        val trainingSchedules = TrainingInfoFixture.createDefault(
+        val trainingSchedules = TrainingInfoFixture.createTrainingSchedule(
             scheduledDate = LocalDate.now().plusDays(1),
             title = "보라매런",
             user = user

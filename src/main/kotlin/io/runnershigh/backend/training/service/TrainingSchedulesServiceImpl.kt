@@ -17,10 +17,10 @@ import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 
 
@@ -30,6 +30,8 @@ class TrainingSchedulesServiceImpl(
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
     private val loginUserContext: LoginUserContext,
 ) : TrainingSchedulesService {
+
+    private val logger = KotlinLogging.logger {}
 
     companion object {
         private const val MAX_FUTURE_DAYS = 365L
@@ -48,7 +50,7 @@ class TrainingSchedulesServiceImpl(
             - 아이템 순서가 연속적인지
             - 페이스 값들이 논리적으로 올바른지
         3. 비즈니스 룰 검증
-            - 거리/시간 제한 (최대 100km)
+            - 거리 제한 (최대 100km) -> 예상거리 검증
          */
 
         // #1. 권한 검증
@@ -132,7 +134,7 @@ class TrainingSchedulesServiceImpl(
         예상 시간 sum
          */
         val scheduleCount = weekTrainingSchedules.size
-        val totalDistance = items.sumOf { it.estimatedDistance ?: 0.0 }
+        val totalDistance = items.sumOf { it.estimatedDistance }
 
         TODO()
     }
@@ -175,7 +177,9 @@ class TrainingSchedulesServiceImpl(
 
     /**
      * 평균 페이스가 적정한 값으로 만들어졌는지 검증
-     * 평균 페이스 > 최소 페이스 && 평균 페이스 < 최대 페이스
+     * Duration 값으로 비교했을때 정상 케이스
+     * 최소 페이스 > 평균 페이스 && 평균 페이스 > 최대 페이스
+     * ex) 최소페이스: PT9M / 최대페이스: PT4M / 평균페이스: PT6M30S
      */
     private fun validatePaceRange(groups: List<SaveTrainingGroup>) {
         groups.flatMap { it.items }.forEach { item ->
@@ -183,16 +187,15 @@ class TrainingSchedulesServiceImpl(
             val avg = item.targetAvgPace
             val max = item.targetMaxPace
 
-            if (min > avg || avg > max) {
+            if (max > avg || avg > min) {
+                logger.info { "Invalid pace range: min: $min, avg: $avg, max: $max" }
                 throw TrainingException(TrainingExceptionType.INVALID_PACE_RANGE)
             }
         }
     }
 
     private fun validateTotalDistance(groups: List<SaveTrainingGroup>) {
-        val totalDistance = groups.flatMap { it.items }
-            .mapNotNull { it.targetDistance }
-            .sum()
+        val totalDistance = groups.flatMap { it.items }.sumOf { it.estimatedDistance }
 
         if (totalDistance > MAX_TRAINING_DISTANCE) {
             throw TrainingException(TrainingExceptionType.TRAINING_DISTANCE_LIMIT_EXCEEDED)

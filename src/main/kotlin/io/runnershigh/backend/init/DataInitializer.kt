@@ -21,9 +21,9 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 import java.util.*
 
@@ -168,30 +168,18 @@ class DataInitializer(
     private fun createTrainingPlanItems(
         itemOrder: Int = faker.number().numberBetween(1, 10),
         targetType: TargetType = faker.options().option(TargetType::class.java),
-        targetMinPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(4, 6),
-            faker.number().numberBetween(0, 59)
-        ),
-        targetMaxPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(5, 7),
-            faker.number().numberBetween(0, 59)
-        ),
-        targetAvgPace: LocalTime = LocalTime.of(
-            faker.number().numberBetween(4, 6),
-            faker.number().numberBetween(30, 59)
-        ),
+        targetMinPace: Duration = Duration.ofMinutes(faker.number().numberBetween(4, 6).toLong())
+            .plusSeconds(faker.number().numberBetween(0, 59).toLong()),
+        targetMaxPace: Duration = Duration.ofMinutes(faker.number().numberBetween(5, 7).toLong())
+            .plusSeconds(faker.number().numberBetween(0, 59).toLong()),
+        targetAvgPace: Duration = Duration.ofMinutes(faker.number().numberBetween(4, 6).toLong())
+            .plusSeconds(faker.number().numberBetween(30, 59).toLong()),
         runningTypeCode: Int = faker.number().numberBetween(1, 5),
         distanceUnit: DistanceUnit = faker.options().option(DistanceUnit::class.java),
         targetDistance: Double = faker.number().randomDouble(1, 1, 20),
-        targetTime: LocalTime = LocalTime.of(
-            faker.number().numberBetween(0, 2),
-            faker.number().numberBetween(0, 59)
-        ),
+        targetTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
         estimatedDistance: Double = faker.number().randomDouble(1, 1, 20),
-        estimatedTime: LocalTime = LocalTime.of(
-            faker.number().numberBetween(0, 2),
-            faker.number().numberBetween(0, 59)
-        ),
+        estimatedTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
         note: String = faker.lorem().sentence(faker.number().numberBetween(5, 20)),
     ): TrainingPlanItems {
         return TrainingPlanItems(
