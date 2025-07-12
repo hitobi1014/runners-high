@@ -11,7 +11,6 @@ plugins {
 
 group = "io.runnershigh"
 
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -21,7 +20,6 @@ java {
 repositories {
     mavenCentral()
 }
-
 
 val koVersion = "5.7.2"
 
@@ -46,8 +44,17 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // Querydsl
+//    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+//    implementation("com.querydsl:querydsl-core:5.0.0")
+//    kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    implementation("jakarta.persistence:jakarta.persistence-api")
+    implementation("jakarta.annotation:jakarta.annotation-api")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    kapt("jakarta.persistence:jakarta.persistence-api")
+    kapt("jakarta.annotation:jakarta.annotation-api")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // Querydsl Logging
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0")
@@ -100,6 +107,19 @@ allOpen {
 
 noArg {
     annotation("jakarta.persistence.Entity")
+}
+
+// build.gradle.kts
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/java", "src/main/kotlin", "build/generated/source/kapt/main")
+        }
+    }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 tasks.withType<Test> {
