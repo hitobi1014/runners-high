@@ -4,6 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import io.runnershigh.backend.training.entity.QTrainingSchedules.trainingSchedules
 import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -53,8 +54,8 @@ class TrainingScheduleRepositoryCustomImpl(
             .where(
                 eqUser(user),
                 betweenScheduleDate(startDate, endDate),
-
-                )
+                eqPlanStatus()
+            )
             .fetch()
     }
 
@@ -70,6 +71,6 @@ class TrainingScheduleRepositoryCustomImpl(
     private fun eqUser(user: UserEntity): BooleanExpression? =
         trainingSchedules.user.eq(user)
 
-//    private fun eqPlanStatus(): BooleanExpression? =
-//        trainingSchedules.status.eq(TrainingSchedules.Status.PLANNED)
+    private fun eqPlanStatus(): BooleanExpression? =
+        trainingSchedules.status.eq(TrainingStatus.PLANNED)
 }
