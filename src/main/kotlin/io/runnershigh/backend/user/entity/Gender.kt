@@ -1,4 +1,4 @@
-package io.runnershigh.backend.user.entity.enum
+package io.runnershigh.backend.user.entity
 
 enum class Gender(val description: String) {
     MALE("남성"),

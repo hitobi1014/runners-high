@@ -52,8 +52,9 @@ class TrainingScheduleRepositoryCustomImpl(
         return queryFactory.selectFrom(trainingSchedules)
             .where(
                 eqUser(user),
-                betweenScheduleDate(startDate, endDate)
-            )
+                betweenScheduleDate(startDate, endDate),
+
+                )
             .fetch()
     }
 
@@ -68,4 +69,7 @@ class TrainingScheduleRepositoryCustomImpl(
 
     private fun eqUser(user: UserEntity): BooleanExpression? =
         trainingSchedules.user.eq(user)
+
+//    private fun eqPlanStatus(): BooleanExpression? =
+//        trainingSchedules.status.eq(TrainingSchedules.Status.PLANNED)
 }

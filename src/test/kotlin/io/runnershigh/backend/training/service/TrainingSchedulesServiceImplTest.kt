@@ -15,9 +15,9 @@ import io.runnershigh.backend.fixture.training.TrainingInfoFixture
 import io.runnershigh.backend.training.dto.request.SaveTrainingGroup
 import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.DistanceUnit
+import io.runnershigh.backend.training.entity.TargetType
+import io.runnershigh.backend.training.entity.TrainingStatus
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.mapper.toDto
@@ -346,6 +346,16 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     confirmVerified(loginUserContext, repository, mockTrainingSchedule)
                 }
             }
+        }
+
+        Given("이번 주 훈련 요약 API가 호출될때") {
+            When("이번 주 훈련 일정이 있는 경우") {
+
+            }
+            When("이번 주 훈련 일정이 없는 경우") {
+
+            }
+//            When("일부 훈련")
         }
     }
 }

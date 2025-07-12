@@ -1,9 +1,9 @@
 package io.runnershigh.backend.training.dto.request
 
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingColor
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.DistanceUnit
+import io.runnershigh.backend.training.entity.TargetType
+import io.runnershigh.backend.training.entity.TrainingColor
+import io.runnershigh.backend.training.entity.TrainingStatus
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
 import java.time.Duration

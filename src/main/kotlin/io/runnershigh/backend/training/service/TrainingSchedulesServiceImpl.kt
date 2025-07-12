@@ -20,6 +20,7 @@ import io.runnershigh.backend.user.util.LoginUserContext
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -125,18 +126,22 @@ class TrainingSchedulesServiceImpl(
         val startDate = DateUtils.findPreviousMonday()
         val endDate = DateUtils.findNextSunday()
 
+        // 필요 데이터 추출
         val weekTrainingSchedules =
             trainingSchedulesRepository.findThisWeekTrainingSchedules(loginUser, startDate, endDate)
         val items = weekTrainingSchedules.flatMap { it.groups }.flatMap { it.items }
-        /*
-        일정 수 count
-        예상거리 sum
-        예상 시간 sum
-         */
+
+        // DTO 산출
         val scheduleCount = weekTrainingSchedules.size
         val totalDistance = items.sumOf { it.estimatedDistance }
+        val totalTime = items.map { it.estimatedTime }
+            .fold(Duration.ZERO) { acc, duration -> acc.plus(duration) }
 
-        TODO()
+        return SummaryThisWeekSchedule(
+            scheduleCount = scheduleCount,
+            totalDistance = totalDistance,
+            totalTime = totalTime
+        )
     }
 
     private fun validateTrainingTime(schedule: LocalDate) {

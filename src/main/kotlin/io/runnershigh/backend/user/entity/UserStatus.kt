@@ -1,4 +1,4 @@
-package io.runnershigh.backend.user.entity.enum
+package io.runnershigh.backend.user.entity
 
 enum class UserStatus(var value: String) {
     ACTIVE("정상"),

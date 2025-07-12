@@ -1,4 +1,4 @@
-package io.runnershigh.backend.training.entity.enum
+package io.runnershigh.backend.training.entity
 
 enum class TrainingColor(val hexCode: String, val displayName: String) {
     LAVENDER("#D8B5FF", "라벤더"),

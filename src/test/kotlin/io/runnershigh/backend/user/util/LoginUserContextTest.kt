@@ -5,8 +5,8 @@ import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.runnershigh.backend.user.entity.UserEntity
-import io.runnershigh.backend.user.entity.enum.AgeGroup
-import io.runnershigh.backend.user.entity.enum.Gender
+import io.runnershigh.backend.user.entity.AgeGroup
+import io.runnershigh.backend.user.entity.Gender
 import io.runnershigh.backend.user.exception.UserException
 import io.runnershigh.backend.user.exception.UserExceptionType
 import io.runnershigh.backend.user.repository.UserRepository

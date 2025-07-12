@@ -11,13 +11,12 @@ import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
-import io.runnershigh.backend.training.entity.enum.TrainingColor
-import io.runnershigh.backend.training.entity.enum.TrainingStatus
+import io.runnershigh.backend.training.entity.DistanceUnit
+import io.runnershigh.backend.training.entity.TargetType
+import io.runnershigh.backend.training.entity.TrainingColor
+import io.runnershigh.backend.training.entity.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import net.datafaker.Faker
-import org.hibernate.dialect.H2DurationIntervalSecondJdbcType
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*

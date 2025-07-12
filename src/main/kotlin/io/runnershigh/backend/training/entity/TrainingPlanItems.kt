@@ -1,8 +1,8 @@
 package io.runnershigh.backend.training.entity
 
+import com.querydsl.core.annotations.PropertyType
+import com.querydsl.core.annotations.QueryType
 import io.runnershigh.backend.shared.entity.BaseEntity
-import io.runnershigh.backend.training.entity.enum.DistanceUnit
-import io.runnershigh.backend.training.entity.enum.TargetType
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
 import java.time.Duration
@@ -22,6 +22,7 @@ class TrainingPlanItems(
     var itemOrder: Int,
 
     @Comment("훈련 목표")
+    @Enumerated(EnumType.STRING)
     var targetType: TargetType,
 
     @Comment("목표 최소 페이스")
