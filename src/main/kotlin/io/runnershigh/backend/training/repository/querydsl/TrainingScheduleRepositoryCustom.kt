@@ -6,17 +6,11 @@ import java.time.LocalDate
 
 interface TrainingScheduleRepositoryCustom {
     fun retrieveTrainingSchedules(user: UserEntity): List<TrainingSchedules>
-    fun retrieveCurrentWeekSchedules(
-        user: UserEntity,
-        previousSunday: LocalDate,
-        nextSaturday: LocalDate,
-    ): List<TrainingSchedules>
-
     fun retrieveNextUpcomingSchedule(user: UserEntity): TrainingSchedules?
-
     fun findThisWeekTrainingSchedules(
         user: UserEntity,
         startDate: LocalDate,
         endDate: LocalDate,
+        plannedOnly: Boolean = false,
     ): List<TrainingSchedules>
 }
