@@ -4,24 +4,20 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.shouldBe
-import io.mockk.clearMocks
-import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import io.runnershigh.backend.fixture.UserFixture
 import io.runnershigh.backend.fixture.training.TrainingInfoFixture
+import io.runnershigh.backend.fixture.training.TrainingScheduleFixture
 import io.runnershigh.backend.training.dto.request.SaveTrainingGroup
 import io.runnershigh.backend.training.dto.request.SaveTrainingItem
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.DistanceUnit
-import io.runnershigh.backend.training.entity.TargetType
-import io.runnershigh.backend.training.entity.TrainingStatus
+import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.mapper.toDto
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
@@ -34,7 +30,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
     private lateinit var loginUserContext: LoginUserContext
 
     @MockK
-    private lateinit var repository: TrainingSchedulesRepository
+    private lateinit var scheduleRepository: TrainingSchedulesRepository
 
     private lateinit var trainingSchedulesService: TrainingSchedulesService
 
@@ -43,13 +39,13 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
     init {
         beforeSpec {
             trainingSchedulesService =
-                TrainingSchedulesServiceImpl(repository, loginUserContext)
+                TrainingSchedulesServiceImpl(scheduleRepository, loginUserContext)
         }
 
         afterTest {
-            clearMocks(repository, loginUserContext)
+            clearMocks(scheduleRepository, loginUserContext)
             trainingSchedulesService =
-                TrainingSchedulesServiceImpl(repository, loginUserContext)
+                TrainingSchedulesServiceImpl(scheduleRepository, loginUserContext)
         }
 
         Given("유저가 올바른 훈련일정을 만든 상태에서") {
@@ -58,7 +54,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             val savedSchedule = TrainingInfoFixture.createTrainingSchedule(user = user)
 
             every { loginUserContext.getCurrentUser() } returns user
-            every { repository.save(any<TrainingSchedules>()) } returns savedSchedule
+            every { scheduleRepository.save(any<TrainingSchedules>()) } returns savedSchedule
 
             When("훈련 생성을 수행하면") {
                 val result = trainingSchedulesService.createTrainingSchedule(dto)
@@ -68,7 +64,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
                     verify(exactly = 1) {
                         loginUserContext.getCurrentUser()
-                        repository.save(match { schedule ->
+                        scheduleRepository.save(match { schedule ->
                             schedule.title == dto.title &&
                                     schedule.location == dto.location &&
                                     schedule.scheduledDate == dto.scheduledDate &&
@@ -78,7 +74,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         })
                     }
 
-                    confirmVerified(loginUserContext, repository)
+                    confirmVerified(loginUserContext, scheduleRepository)
                 }
             }
         }
@@ -114,7 +110,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -174,7 +170,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -213,7 +209,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -249,7 +245,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -272,7 +268,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     }
 
                     verify(exactly = 0) {
-                        repository.save(any())
+                        scheduleRepository.save(any())
                     }
                 }
             }
@@ -285,7 +281,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 TrainingInfoFixture.createMultipleEntityMocks(2, mockUser)
 
             every { loginUserContext.getCurrentUser() } returns mockUser
-            every { repository.retrieveTrainingSchedules(mockUser) } returns mockTrainingSchedules
+            every { scheduleRepository.retrieveTrainingSchedules(mockUser) } returns mockTrainingSchedules
 
             When("정상적으로 조회를 성공하면") {
                 val result = trainingSchedulesService.getTrainingSchedules()
@@ -296,14 +292,14 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
                     verify {
                         loginUserContext.getCurrentUser()
-                        repository.retrieveTrainingSchedules(mockUser)
+                        scheduleRepository.retrieveTrainingSchedules(mockUser)
                         mockTrainingSchedules[0].toDto()
                         mockTrainingSchedules[1].toDto()
                     }
 
                     confirmVerified(
                         loginUserContext,
-                        repository,
+                        scheduleRepository,
                         *mockTrainingSchedules.toTypedArray()
                     )
                 }
@@ -322,7 +318,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
             )
 
             every { loginUserContext.getCurrentUser() } returns mockUser
-            every { repository.retrieveNextUpcomingSchedule(mockUser) } returns mockTrainingSchedule
+            every { scheduleRepository.retrieveNextUpcomingSchedule(mockUser) } returns mockTrainingSchedule
 
             When("다음 예정된 훈련 일정을 조회하면") {
                 val result = trainingSchedulesService.getNextUpcomingTrainingSchedule()
@@ -336,26 +332,126 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
                     verify {
                         loginUserContext.getCurrentUser()
-                        repository.retrieveNextUpcomingSchedule(mockUser)
+                        scheduleRepository.retrieveNextUpcomingSchedule(mockUser)
                         mockTrainingSchedule.id
                         mockTrainingSchedule.title
                         mockTrainingSchedule.scheduledDate
                         mockTrainingSchedule.groups
                     }
 
-                    confirmVerified(loginUserContext, repository, mockTrainingSchedule)
+                    confirmVerified(loginUserContext, scheduleRepository, mockTrainingSchedule)
                 }
             }
         }
 
         Given("이번 주 훈련 요약 API가 호출될때") {
-            When("이번 주 훈련 일정이 있는 경우") {
+            val mockUser = mockk<UserEntity>()
 
-            }
             When("이번 주 훈련 일정이 없는 경우") {
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns emptyList()
 
+                Then("모든 값이 0인 요약 정보를 반환한다.") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = 0,
+                        totalDistance = 0.0,
+                        totalTime = Duration.ZERO
+                    )
+                    result shouldBe dto
+
+                    verify { loginUserContext.getCurrentUser() }
+                    verify {
+                        scheduleRepository.findThisWeekTrainingSchedules(
+                            mockUser,
+                            any(),
+                            any()
+                        )
+                    }
+                }
             }
-//            When("일부 훈련")
+
+            When("이번 주 훈련 일정이 여러개 있는 경우") {
+                val mockSchedule1 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 10.0,
+                    estimatedTime = Duration.ofMinutes(50)
+                )
+                val mockSchedule2 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 15.0,
+                    estimatedTime = Duration.ofMinutes(90)
+                )
+                val mockSchedule3 = TrainingScheduleFixture.createMockTrainingSchedule(
+                    estimatedDistance = 5.0,
+                    estimatedTime = Duration.ofMinutes(30)
+                )
+                val scheduleList = listOf(mockSchedule1, mockSchedule2, mockSchedule3)
+
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns scheduleList
+
+                Then("모든 일정의 합계를 반환한다") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = scheduleList.size,
+                        totalDistance = 30.0,
+                        totalTime = Duration.ofMinutes(170)
+                    )
+                    result shouldBe dto
+                }
+            }
+
+            When("훈련 일정에 여러 그룹과 아이템이 있는 경우") {
+                val mockItem1 = mockk<TrainingPlanItems>()
+                val mockItem2 = mockk<TrainingPlanItems>()
+                val mockItem3 = mockk<TrainingPlanItems>()
+
+                every { mockItem1.estimatedDistance } returns 10.0
+                every { mockItem1.estimatedTime } returns Duration.ofMinutes(50)
+                every { mockItem2.estimatedDistance } returns 15.0
+                every { mockItem2.estimatedTime } returns Duration.ofMinutes(90)
+                every { mockItem3.estimatedDistance } returns 5.0
+                every { mockItem3.estimatedTime } returns Duration.ofMinutes(30)
+
+                val mockGroup1 = mockk<TrainingPlanGroups>()
+                val mockGroup2 = mockk<TrainingPlanGroups>()
+
+                every { mockGroup1.items } returns mutableListOf(mockItem1, mockItem2)
+                every { mockGroup2.items } returns mutableListOf(mockItem3)
+
+                val mockSchedule = mockk<TrainingSchedules>()
+                every { mockSchedule.groups } returns mutableListOf(mockGroup1, mockGroup2)
+
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns listOf(mockSchedule)
+
+                Then("모든 일정의 합계를 반환한다") {
+                    val result = trainingSchedulesService.getSummaryThisWeekForSchedule()
+                    val dto = TrainingScheduleFixture.createMockSummaryThisWeekSchedule(
+                        scheduleCount = 1,
+                        totalDistance = 30.0,
+                        totalTime = Duration.ofMinutes(170)
+                    )
+                    result shouldBe dto
+                }
+            }
         }
     }
 }
