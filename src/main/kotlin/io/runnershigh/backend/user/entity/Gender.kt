@@ -7,7 +7,7 @@ enum class Gender(val description: String) {
 
     companion object {
         fun fromString(value: String): Gender {
-            return Gender.entries.find { it.name == value }
+            return Gender.entries.find { it.name.equals(value, ignoreCase = true) }
                 ?: throw IllegalArgumentException("선택한 Gender가 없습니다. $value")
         }
     }

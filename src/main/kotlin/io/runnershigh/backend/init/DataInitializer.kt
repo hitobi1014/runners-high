@@ -1,17 +1,12 @@
 package io.runnershigh.backend.init
 
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
-import io.runnershigh.backend.training.entity.TrainingPlanItems
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.DistanceUnit
-import io.runnershigh.backend.training.entity.TargetType
-import io.runnershigh.backend.training.entity.TrainingColor
-import io.runnershigh.backend.training.entity.TrainingStatus
+import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
-import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.entity.AgeGroup
 import io.runnershigh.backend.user.entity.Gender
+import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.repository.UserRepository
 import mu.KotlinLogging
 import net.datafaker.Faker
@@ -83,17 +78,8 @@ class DataInitializer(
         // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전
         val trainingSchedules = createSchedule2(user, LocalDate.now().plusDays(1))
         trainingSchedulesRepository.save(trainingSchedules)
+
         trainingSchedulesRepository.flush()
-
-        // TODO 250705) 훈련일정 items가 가지고있을 필요 x, 테스트 후 삭제
-//        val planItem1 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 1)
-//        val planItem2 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 2)
-//        val planItem3 =
-//            createTrainingPlanItems(schedule = trainingSchedules, itemOrder = 3)
-
-//        trainingPlanItemsRepository.saveAll(listOf(planItem1, planItem2, planItem3))
         trainingPlanItemsRepository.flush()
     }
 
