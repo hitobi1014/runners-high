@@ -1,11 +1,6 @@
 package io.runnershigh.backend.training.entity
 
-import com.querydsl.core.annotations.PropertyType
-import com.querydsl.core.annotations.QueryType
 import io.runnershigh.backend.shared.entity.BaseEntity
-//import io.runnershigh.backend.training.entity.TrainingColor
-import io.runnershigh.backend.training.entity.TrainingStatus
-import io.runnershigh.backend.training.entity.TrainingColor
 import io.runnershigh.backend.user.entity.UserEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment

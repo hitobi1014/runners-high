@@ -120,7 +120,7 @@ class TrainingSchedulesServiceImpl(
         )
     }
 
-    override fun getSummaryThisWeekForSchedule(user: UserEntity): SummaryThisWeekSchedule {
+    override fun getSummaryThisWeekForSchedule(): SummaryThisWeekSchedule {
         val loginUser = loginUserContext.getCurrentUser()
 
         val startDate = DateUtils.findPreviousMonday()
