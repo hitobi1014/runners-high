@@ -9,7 +9,7 @@ class DateUtilsTest {
 
     @Test
     @DisplayName("현재 일자 기준으로 가장 가까운 이전 월요일, 이후 일요일 반환")
-    fun findPreviousSundayAndNextSaturday_whenCurrentDate_returnsSundayAndSaturday() {
+    fun findPreviousMondayAndNextSunday_whenCurrentDate_returnsMondayAndSunday() {
         //given
         val date = LocalDate.of(2025, 7, 12)
         val expectedMonday = LocalDate.of(2025, 7, 7)
