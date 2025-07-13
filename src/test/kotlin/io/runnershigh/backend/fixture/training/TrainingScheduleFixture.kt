@@ -3,11 +3,15 @@ package io.runnershigh.backend.fixture.training
 import io.mockk.every
 import io.mockk.mockk
 import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
+import io.runnershigh.backend.training.dto.response.WeeklyTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
+import io.runnershigh.backend.training.entity.TrainingStatus
 import net.datafaker.Faker
 import java.time.Duration
+import java.time.LocalDate
+import java.time.format.TextStyle
 import java.util.*
 
 object TrainingScheduleFixture {
@@ -43,5 +47,41 @@ object TrainingScheduleFixture {
         return mockSchedule
     }
 
+    fun createMockWeeklyTrainingSchedule(
+        scheduleId: Long = faker.random().nextLong(1000),
+        title: String = faker.lorem().characters(5, 15),
+        scheduledDate: LocalDate = LocalDate.now().plusDays(faker.random().nextLong(0, 7)),
+        dayOfWeek: String = scheduledDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREAN),
+        distance: Double = faker.random().nextDouble(1.0, 50.0),
+        status: TrainingStatus = TrainingStatus.entries.toTypedArray().random(),
+    ) = WeeklyTrainingSchedule(
+        scheduleId = scheduleId,
+        title = title,
+        dayOfWeek = dayOfWeek,
+        distance = distance,
+        status = status,
+        scheduledDate = scheduledDate
+    )
 
+    fun createMockTrainingScheduleForWeekly(
+        id: Long = faker.random().nextLong(1000),
+        title: String = faker.lorem().characters(5, 15),
+        scheduledDate: LocalDate = LocalDate.now(),
+        status: TrainingStatus = TrainingStatus.PLANNED,
+    ): TrainingSchedules {
+        val mockSchedule = mockk<TrainingSchedules>()
+        val mockGroup = mockk<TrainingPlanGroups>()
+        val mockItem = mockk<TrainingPlanItems>()
+
+        every { mockItem.estimatedDistance } returns faker.random().nextDouble(1.0, 50.0)
+        every { mockGroup.items } returns mutableListOf(mockItem)
+
+        every { mockSchedule.id } returns id
+        every { mockSchedule.title } returns title
+        every { mockSchedule.scheduledDate } returns scheduledDate
+        every { mockSchedule.status } returns status
+        every { mockSchedule.groups } returns mutableListOf(mockGroup)
+
+        return mockSchedule
+    }
 }

@@ -83,7 +83,7 @@ class TrainingSchedulesServiceImpl(
         return trainingSchedulesList.map(TrainingSchedules::toReadTrainingSchedule)
     }
 
-    override fun getCurrentWeekTrainingSchedules(): List<WeeklyTrainingSchedule> {
+    override fun getThisWeekTrainingSchedules(): List<WeeklyTrainingSchedule> {
         // #1. 현재 로그인 한 유저
         val loginUser = loginUserContext.getCurrentUser()
 

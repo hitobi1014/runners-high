@@ -15,7 +15,7 @@ import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
-import io.runnershigh.backend.training.mapper.toDto
+import io.runnershigh.backend.training.mapper.toReadTrainingSchedule
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
@@ -78,7 +78,6 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 }
             }
         }
-
         Given("그룹 순서가 잘못된 훈련 일정을 만들고") {
             val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(
                 groups = listOf(
@@ -293,8 +292,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     verify {
                         loginUserContext.getCurrentUser()
                         scheduleRepository.retrieveTrainingSchedules(mockUser)
-                        mockTrainingSchedules[0].toDto()
-                        mockTrainingSchedules[1].toDto()
+                        mockTrainingSchedules[0].toReadTrainingSchedule()
+                        mockTrainingSchedules[1].toReadTrainingSchedule()
                     }
 
                     confirmVerified(
@@ -353,7 +352,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     scheduleRepository.findThisWeekTrainingSchedules(
                         mockUser,
                         any(),
-                        any()
+                        any(),
+                        plannedOnly = true
                     )
                 } returns emptyList()
 
@@ -371,7 +371,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         scheduleRepository.findThisWeekTrainingSchedules(
                             mockUser,
                             any(),
-                            any()
+                            any(),
+                            plannedOnly = true
                         )
                     }
                 }
@@ -397,7 +398,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     scheduleRepository.findThisWeekTrainingSchedules(
                         mockUser,
                         any(),
-                        any()
+                        any(),
+                        plannedOnly = true
                     )
                 } returns scheduleList
 
@@ -438,7 +440,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     scheduleRepository.findThisWeekTrainingSchedules(
                         mockUser,
                         any(),
-                        any()
+                        any(),
+                        plannedOnly = true
                     )
                 } returns listOf(mockSchedule)
 
@@ -453,8 +456,88 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 }
             }
         }
+
+        Given("이번 주 훈련일정을 조회하려고 할때") {
+            val mockUser = userEntity("test9")
+
+            When("이번 주 훈련일정이 없는 경우") {
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns emptyList()
+
+                val result = trainingSchedulesService.getThisWeekTrainingSchedules()
+
+                Then("빈 리스트를 반환한다") {
+                    result shouldBe emptyList()
+
+                    verify {
+                        loginUserContext.getCurrentUser()
+                        scheduleRepository.findThisWeekTrainingSchedules(
+                            mockUser,
+                            any(),
+                            any()
+                        )
+                    }
+                }
+            }
+
+            When("이번 주 훈련일정이 여러개 있는 경우") {
+                val mockSchedule1 = TrainingScheduleFixture.createMockTrainingScheduleForWeekly(
+                    id = 1L,
+                    title = "즐겁게 월요런",
+                    scheduledDate = LocalDate.now().minusDays(3)
+                )
+                val mockSchedule2 = TrainingScheduleFixture.createMockTrainingScheduleForWeekly(
+                    id = 2L,
+                    title = "템포런 훈련",
+                    scheduledDate = LocalDate.now()
+                )
+
+                every { loginUserContext.getCurrentUser() } returns mockUser
+                every {
+                    scheduleRepository.findThisWeekTrainingSchedules(
+                        mockUser,
+                        any(),
+                        any()
+                    )
+                } returns listOf(mockSchedule1, mockSchedule2)
+
+                val result = trainingSchedulesService.getThisWeekTrainingSchedules()
+
+                Then("훈련일정 목록을 WeeklyTrainingSchedule 형태로 반환한다") {
+                    result.size shouldBe 2
+
+                    result[0].run {
+                        scheduleId shouldBe 1L
+                        title shouldBe "즐겁게 월요런"
+                        scheduledDate shouldBe LocalDate.now().minusDays(3)
+                    }
+
+                    result[1].run {
+                        scheduleId shouldBe 2L
+                        title shouldBe "템포런 훈련"
+                        scheduledDate shouldBe LocalDate.now()
+                    }
+
+                    verify {
+                        loginUserContext.getCurrentUser()
+                        scheduleRepository.findThisWeekTrainingSchedules(
+                            mockUser,
+                            any(),
+                            any()
+                        )
+                    }
+
+                    confirmVerified(loginUserContext, scheduleRepository)
+                }
+            }
+        }
     }
 }
-
 
 

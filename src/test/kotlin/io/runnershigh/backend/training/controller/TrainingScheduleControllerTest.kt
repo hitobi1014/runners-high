@@ -60,19 +60,15 @@ class TrainingScheduleControllerTest(
     }
 
     Given("이번 주 훈련 일정이 있는 상태에서") {
-        val mockSchedule1 = TrainingInfoFixture.createReadTrainingSchedule()
-        val mockSchedule2 = TrainingInfoFixture.createReadTrainingSchedule(
-            id = 2L, title = "보라매 공원 템포런",
-            scheduledDate = LocalDate.now().plusDays(1)
-        )
-        val mockSchedule3 = TrainingInfoFixture.createReadTrainingSchedule(
-            id = 3L,
-            title = "남산 업힐",
-            scheduledDate = LocalDate.now().plusDays(3)
-        )
+        val mockSchedule1 =
+            TrainingScheduleFixture.createMockWeeklyTrainingSchedule(scheduleId = 1L)
+        val mockSchedule2 =
+            TrainingScheduleFixture.createMockWeeklyTrainingSchedule(scheduleId = 2L)
+        val mockSchedule3 =
+            TrainingScheduleFixture.createMockWeeklyTrainingSchedule(scheduleId = 3L)
         val mockList = listOf(mockSchedule1, mockSchedule2, mockSchedule3)
 
-        every { trainingScheduleUseCase.getCurrentWeekTrainingSchedules() } returns mockList
+        every { trainingScheduleUseCase.getThisWeekTrainingSchedules() } returns mockList
 
         When("이번 주 훈련 일정을 조회하면") {
             Then("성공적으로 훈련 일정 3개가 반환된다.") {
@@ -84,12 +80,12 @@ class TrainingScheduleControllerTest(
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.message").value(CommonResponseMessage.SUCCESS_GET_DATA.message))
                     .andExpect(jsonPath("$.data.length()").value(3))
-                    .andExpect(jsonPath("$.data[0].id").value(mockSchedule1.id))
+                    .andExpect(jsonPath("$.data[0].scheduleId").value(mockSchedule1.scheduleId))
                     .andExpect(jsonPath("$.data[0].title").value(mockSchedule1.title))
-                    .andExpect(jsonPath("$.data[1].id").value(mockSchedule2.id))
+                    .andExpect(jsonPath("$.data[1].scheduleId").value(mockSchedule2.scheduleId))
                     .andExpect(jsonPath("$.data[1].title").value(mockSchedule2.title))
 
-                verify(exactly = 1) { trainingScheduleUseCase.getCurrentWeekTrainingSchedules() }
+                verify(exactly = 1) { trainingScheduleUseCase.getThisWeekTrainingSchedules() }
             }
         }
     }
