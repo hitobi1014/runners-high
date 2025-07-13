@@ -7,13 +7,15 @@ import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
+import io.runnershigh.backend.training.dto.response.WeeklyTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.exception.TrainingException
 import io.runnershigh.backend.training.exception.TrainingExceptionType
 import io.runnershigh.backend.training.extension.calculateTotalDistanceAndTime
-import io.runnershigh.backend.training.mapper.toDto
+import io.runnershigh.backend.training.mapper.toReadTrainingSchedule
+import io.runnershigh.backend.training.mapper.toWeeklyTrainingSchedule
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
@@ -78,24 +80,24 @@ class TrainingSchedulesServiceImpl(
         val trainingSchedulesList = trainingSchedulesRepository.retrieveTrainingSchedules(loginUser)
 
         // #3. 엔티티 -> Schedule 변환
-        return trainingSchedulesList.map(TrainingSchedules::toDto)
+        return trainingSchedulesList.map(TrainingSchedules::toReadTrainingSchedule)
     }
 
-    override fun getCurrentWeekTrainingSchedules(): List<ReadTrainingSchedule> {
+    override fun getThisWeekTrainingSchedules(): List<WeeklyTrainingSchedule> {
         // #1. 현재 로그인 한 유저
         val loginUser = loginUserContext.getCurrentUser()
 
         // #2. 이번 주 훈련 일정 가져오기
-        val (previousSunday, nextSaturday) = DateUtils.getWeekBoundaries(LocalDate.now())
+        val (previousMonday, nextSunday) = DateUtils.getWeekBoundaries()
         val trainingSchedulesList =
-            trainingSchedulesRepository.retrieveCurrentWeekSchedules(
+            trainingSchedulesRepository.findThisWeekTrainingSchedules(
                 user = loginUser,
-                previousSunday = previousSunday,
-                nextSaturday = nextSaturday
+                startDate = previousMonday,
+                endDate = nextSunday
             )
 
         // #3. 엔티티 -> Schedule 변환
-        return trainingSchedulesList.map(TrainingSchedules::toDto)
+        return trainingSchedulesList.map(TrainingSchedules::toWeeklyTrainingSchedule)
     }
 
     override fun getNextUpcomingTrainingSchedule(): NextTrainingSchedule? {
@@ -128,7 +130,12 @@ class TrainingSchedulesServiceImpl(
 
         // 필요 데이터 추출
         val weekTrainingSchedules =
-            trainingSchedulesRepository.findThisWeekTrainingSchedules(loginUser, startDate, endDate)
+            trainingSchedulesRepository.findThisWeekTrainingSchedules(
+                loginUser,
+                startDate,
+                endDate,
+                plannedOnly = true
+            )
         val items = weekTrainingSchedules.flatMap { it.groups }.flatMap { it.items }
 
         // DTO 산출

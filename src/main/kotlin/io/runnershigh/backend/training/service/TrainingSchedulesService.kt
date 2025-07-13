@@ -4,12 +4,13 @@ import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
+import io.runnershigh.backend.training.dto.response.WeeklyTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
 
 interface TrainingSchedulesService {
     fun createTrainingSchedule(dto: SaveTrainingInfo): TrainingSchedules
     fun getTrainingSchedules(): List<ReadTrainingSchedule>
-    fun getCurrentWeekTrainingSchedules(): List<ReadTrainingSchedule>
+    fun getThisWeekTrainingSchedules(): List<WeeklyTrainingSchedule>
     fun getNextUpcomingTrainingSchedule(): NextTrainingSchedule?
     fun getSummaryThisWeekForSchedule(): SummaryThisWeekSchedule
 }

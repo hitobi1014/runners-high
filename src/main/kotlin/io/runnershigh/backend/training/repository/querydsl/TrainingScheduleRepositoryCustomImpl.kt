@@ -20,21 +20,7 @@ class TrainingScheduleRepositoryCustomImpl(
             .orderBy(trainingSchedules.scheduledDate.desc())
             .fetch()
     }
-
-    override fun retrieveCurrentWeekSchedules(
-        user: UserEntity,
-        previousSunday: LocalDate,
-        nextSaturday: LocalDate,
-    ): List<TrainingSchedules> {
-        return queryFactory.selectFrom(trainingSchedules)
-            .where(
-                eqUser(user),
-                betweenSundayAndSaturday(previousSunday, nextSaturday)
-            )
-            .orderBy(trainingSchedules.scheduledDate.desc())
-            .fetch()
-    }
-
+    
     override fun retrieveNextUpcomingSchedule(user: UserEntity): TrainingSchedules? {
         return queryFactory.selectFrom(trainingSchedules)
             .where(
@@ -49,13 +35,15 @@ class TrainingScheduleRepositoryCustomImpl(
         user: UserEntity,
         startDate: LocalDate,
         endDate: LocalDate,
+        plannedOnly: Boolean,
     ): List<TrainingSchedules> {
         return queryFactory.selectFrom(trainingSchedules)
             .where(
                 eqUser(user),
                 betweenScheduleDate(startDate, endDate),
-                eqPlanStatus()
+                if (plannedOnly) eqPlanStatus() else null
             )
+            .orderBy(trainingSchedules.scheduledDate.desc())
             .fetch()
     }
 
