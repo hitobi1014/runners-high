@@ -22,6 +22,13 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
+        // OPTIONS 메서드는 바로 통과 (CORS preflight 허용)
+        if (request.method.equals("OPTIONS", ignoreCase = true)) {
+            println("OPTIONS 무조건 통과")
+            filterChain.doFilter(request, response)
+            return
+        }
+
         val token = resolveToken(request)
 
         if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token!!)) {
