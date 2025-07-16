@@ -3,6 +3,7 @@ package io.runnershigh.backend.init
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
 import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.training.repository.TrainingPlanItemsRepository
+import io.runnershigh.backend.training.repository.TrainingPlanGroupRepository
 import io.runnershigh.backend.training.repository.TrainingSchedulesRepository
 import io.runnershigh.backend.user.entity.AgeGroup
 import io.runnershigh.backend.user.entity.Gender
@@ -27,6 +28,7 @@ import java.util.*
 class DataInitializer(
     private val userRepository: UserRepository,
     private val trainingSchedulesRepository: TrainingSchedulesRepository,
+    private val trainingPlanGroupRepository: TrainingPlanGroupRepository,
     private val trainingPlanItemsRepository: TrainingPlanItemsRepository,
     private val jwtTokenProvider: JwtTokenProvider,
     private val passwordEncoder: PasswordEncoder,
@@ -35,10 +37,8 @@ class DataInitializer(
     private val skipDataInit: Boolean,
 ) : ApplicationRunner {
 
-
     private val faker = Faker(Locale.KOREA)
     private val zoneId = ZoneId.systemDefault()
-
     private val logger = KotlinLogging.logger {}
 
     override fun run(args: ApplicationArguments?) {
@@ -91,14 +91,84 @@ class DataInitializer(
 
     private fun initUsers() {
         logger.info { "initUsers 실행" }
+        
+        // test1, test2, test3 사용자 생성
         val user1 = createUser(
             loginId = "test1",
             password = passwordEncoder.encode("test1"),
-            nickname = "테스트1"
+            nickname = faker.name().fullName()
         )
-        val user2 = createUser(loginId = "test2", nickname = "테스트2")
-        userRepository.saveAll(listOf(user1, user2))
+        val user2 = createUser(
+            loginId = "test2", 
+            password = passwordEncoder.encode("test2"),
+            nickname = faker.name().fullName()
+        )
+        val user3 = createUser(
+            loginId = "test3", 
+            password = passwordEncoder.encode("test3"),
+            nickname = faker.name().fullName()
+        )
+        
+        userRepository.saveAll(listOf(user1, user2, user3))
         userRepository.flush()
+        
+        // 각 유저당 50개씩 훈련 데이터 생성
+        listOf(user1, user2, user3).forEach { user ->
+            createTrainingDataForUser(user, 50)
+        }
+    }
+
+    private fun createTrainingDataForUser(user: UserEntity, count: Int) {
+        repeat(count) {
+            // 현재일부터 1주일 후까지 랜덤 날짜 생성
+            val startDate = LocalDate.now()
+            val randomDate = startDate.plusDays(faker.number().numberBetween(0, 8).toLong())
+            
+            // TrainingSchedule 생성
+            val schedule = TrainingSchedules(
+                user = user,
+                title = generateRandomScheduleTitle(),
+                location = generateRandomLocation(),
+                scheduledDate = randomDate,
+                color = TrainingColor.entries.toTypedArray().random(),
+                description = faker.lorem().sentence(),
+                status = TrainingStatus.PLANNED
+            )
+            val savedSchedule = trainingSchedulesRepository.save(schedule)
+            
+            // TrainingPlanGroups 생성 (1-3개 랜덤)
+            val groupCount = faker.number().numberBetween(1, 4)
+            repeat(groupCount) { groupIndex ->
+                val group = TrainingPlanGroups(
+                    schedule = savedSchedule,
+                    groupOrder = groupIndex + 1,
+                    repeatCount = faker.number().numberBetween(1, 4),
+                    description = faker.lorem().sentence()
+                )
+                val savedGroup = trainingPlanGroupRepository.save(group)
+                
+                // 각 그룹마다 TrainingPlanItems 생성 (1-3개 랜덤)
+                val itemCount = faker.number().numberBetween(1, 4)
+                repeat(itemCount) { itemIndex ->
+                    val planItem = TrainingPlanItems(
+                        group = savedGroup,
+                        itemOrder = itemIndex + 1,
+                        targetType = TargetType.entries.random(),
+                        targetMinPace = generateRandomDuration(4, 6),
+                        targetMaxPace = generateRandomDuration(5, 7),
+                        targetAvgPace = generateRandomDuration(4, 6),
+                        runningTypeCode = faker.number().numberBetween(1, 6),
+                        distanceUnit = DistanceUnit.entries.random(),
+                        targetDistance = faker.number().randomDouble(1, 1, 21),
+                        targetTime = generateRandomDuration(10, 120),
+                        estimatedDistance = faker.number().randomDouble(1, 1, 21),
+                        estimatedTime = generateRandomDuration(10, 120),
+                        note = faker.lorem().sentence()
+                    )
+                    trainingPlanItemsRepository.save(planItem)
+                }
+            }
+        }
     }
 
     private fun createSchedule(
@@ -137,9 +207,9 @@ class DataInitializer(
         loginId: String = faker.lorem().characters(30),
         password: String = passwordEncoder.encode(faker.internet().password()),
         nickname: String = faker.funnyName().name(),
-        gender: Gender = Gender.MALE,
+        gender: Gender = Gender.entries.random(),
         profileImage: String = faker.internet().image(640, 480),
-        ageGroup: AgeGroup = AgeGroup.TWENTIES,
+        ageGroup: AgeGroup = AgeGroup.entries.random(),
     ): UserEntity {
         return UserEntity(
             loginId = loginId,
@@ -184,5 +254,25 @@ class DataInitializer(
         )
     }
 
-
+    private fun generateRandomScheduleTitle(): String {
+        val titles = listOf(
+            "템포런 훈련", "LSD 장거리", "인터벌 러닝", "페이스 러닝", "힐 러닝",
+            "조깅", "쿨다운", "워밍업", "스피드 워크", "크로스 트레이닝"
+        )
+        return titles.random()
+    }
+    
+    private fun generateRandomLocation(): String {
+        val locations = listOf(
+            "올림픽공원", "한강공원", "남산공원", "여의도공원", "선유도공원",
+            "월드컵공원", "보라매공원", "중앙공원", "탄천", "청계천"
+        )
+        return locations.random()
+    }
+    
+    private fun generateRandomDuration(minMinutes: Int, maxMinutes: Int): Duration {
+        val minutes = faker.number().numberBetween(minMinutes, maxMinutes).toLong()
+        val seconds = faker.number().numberBetween(0, 60).toLong()
+        return Duration.ofMinutes(minutes).plusSeconds(seconds)
+    }
 }
