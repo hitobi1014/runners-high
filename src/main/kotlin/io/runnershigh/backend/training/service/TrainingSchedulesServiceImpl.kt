@@ -23,7 +23,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -60,7 +60,7 @@ class TrainingSchedulesServiceImpl(
         val loginUser = loginUserContext.getCurrentUser()
 
         // #2. DTO 값 검증 - 데이터 정합성
-        validateTrainingTime(dto.scheduledDate)
+        validateTrainingTime(dto.scheduledDateTime)
         validateGroupOrder(dto.groups)
         validateItemOrder(dto.groups)
         validatePaceRange(dto.groups)
@@ -92,8 +92,8 @@ class TrainingSchedulesServiceImpl(
         val trainingSchedulesList =
             trainingSchedulesRepository.findThisWeekTrainingSchedules(
                 user = loginUser,
-                startDate = previousMonday,
-                endDate = nextSunday
+                startDateTime = previousMonday,
+                endDateTime = nextSunday
             )
 
         // #3. 엔티티 -> Schedule 변환
@@ -116,7 +116,7 @@ class TrainingSchedulesServiceImpl(
         return NextTrainingSchedule(
             scheduleId = trainingSchedule.id,
             title = trainingSchedule.title,
-            scheduledDate = trainingSchedule.scheduledDate,
+            scheduledDateTime = trainingSchedule.scheduledDateTime,
             totalDistance = totalDistance,
             totalTime = totalTime
         )
@@ -151,8 +151,8 @@ class TrainingSchedulesServiceImpl(
         )
     }
 
-    private fun validateTrainingTime(schedule: LocalDate) {
-        val now = LocalDate.now(ZoneId.of("Asia/Seoul"))
+    private fun validateTrainingTime(schedule: LocalDateTime) {
+        val now = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
 
         if (schedule.isAfter(now.plusDays(MAX_FUTURE_DAYS))) {
             throw TrainingException(TrainingExceptionType.CANNOT_REGISTER_TRAINING_BEYOND_ONE_YEAR)
@@ -226,7 +226,7 @@ class TrainingSchedulesServiceImpl(
             user = user,
             title = dto.title,
             location = dto.location,
-            scheduledDate = dto.scheduledDate,
+            scheduledDateTime = dto.scheduledDateTime,
             description = dto.description,
             status = dto.status,
             color = dto.color

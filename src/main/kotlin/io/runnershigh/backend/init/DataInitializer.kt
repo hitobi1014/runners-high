@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
@@ -76,7 +77,7 @@ class DataInitializer(
     private fun initTrainingPlanItems() {
         val user = getUserByLoginId()
         // TODO 추후 mock 데이터 리팩토링 -> 자동생성버전, faker 이용버전
-        val trainingSchedules = createSchedule2(user, LocalDate.now().plusDays(1))
+        val trainingSchedules = createSchedule2(user, LocalDateTime.now().plusDays(1))
         trainingSchedulesRepository.save(trainingSchedules)
 
         trainingSchedulesRepository.flush()
@@ -91,7 +92,7 @@ class DataInitializer(
 
     private fun initUsers() {
         logger.info { "initUsers 실행" }
-        
+
         // test1, test2, test3 사용자 생성
         val user1 = createUser(
             loginId = "test1",
@@ -99,19 +100,19 @@ class DataInitializer(
             nickname = faker.name().fullName()
         )
         val user2 = createUser(
-            loginId = "test2", 
+            loginId = "test2",
             password = passwordEncoder.encode("test2"),
             nickname = faker.name().fullName()
         )
         val user3 = createUser(
-            loginId = "test3", 
+            loginId = "test3",
             password = passwordEncoder.encode("test3"),
             nickname = faker.name().fullName()
         )
-        
+
         userRepository.saveAll(listOf(user1, user2, user3))
         userRepository.flush()
-        
+
         // 각 유저당 50개씩 훈련 데이터 생성
         listOf(user1, user2, user3).forEach { user ->
             createTrainingDataForUser(user, 50)
@@ -121,21 +122,21 @@ class DataInitializer(
     private fun createTrainingDataForUser(user: UserEntity, count: Int) {
         repeat(count) {
             // 현재일부터 1주일 후까지 랜덤 날짜 생성
-            val startDate = LocalDate.now()
+            val startDate = LocalDateTime.now()
             val randomDate = startDate.plusDays(faker.number().numberBetween(0, 8).toLong())
-            
+
             // TrainingSchedule 생성
             val schedule = TrainingSchedules(
                 user = user,
                 title = generateRandomScheduleTitle(),
                 location = generateRandomLocation(),
-                scheduledDate = randomDate,
+                scheduledDateTime = randomDate,
                 color = TrainingColor.entries.toTypedArray().random(),
                 description = faker.lorem().sentence(),
                 status = TrainingStatus.PLANNED
             )
             val savedSchedule = trainingSchedulesRepository.save(schedule)
-            
+
             // TrainingPlanGroups 생성 (1-3개 랜덤)
             val groupCount = faker.number().numberBetween(1, 4)
             repeat(groupCount) { groupIndex ->
@@ -146,7 +147,7 @@ class DataInitializer(
                     description = faker.lorem().sentence()
                 )
                 val savedGroup = trainingPlanGroupRepository.save(group)
-                
+
                 // 각 그룹마다 TrainingPlanItems 생성 (1-3개 랜덤)
                 val itemCount = faker.number().numberBetween(1, 4)
                 repeat(itemCount) { itemIndex ->
@@ -180,8 +181,8 @@ class DataInitializer(
             user = user,
             title = faker.lorem().characters(10, 100),
             location = faker.address().streetAddress(),
-            scheduledDate = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
-                .toLocalDate(),
+            scheduledDateTime = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
+                .toLocalDateTime(),
             color = TrainingColor.entries.toTypedArray().random(),
             description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
@@ -190,13 +191,13 @@ class DataInitializer(
 
     private fun createSchedule2(
         user: UserEntity,
-        scheduleDate: LocalDate,
+        scheduleDate: LocalDateTime,
     ): TrainingSchedules {
         return TrainingSchedules(
             user = user,
             title = faker.lorem().characters(10, 100),
             location = faker.address().streetAddress(),
-            scheduledDate = scheduleDate,
+            scheduledDateTime = scheduleDate,
             color = TrainingColor.entries.toTypedArray().random(),
             description = faker.lorem().characters(20, 100),
             status = TrainingStatus.PLANNED
@@ -261,7 +262,7 @@ class DataInitializer(
         )
         return titles.random()
     }
-    
+
     private fun generateRandomLocation(): String {
         val locations = listOf(
             "올림픽공원", "한강공원", "남산공원", "여의도공원", "선유도공원",
@@ -269,7 +270,7 @@ class DataInitializer(
         )
         return locations.random()
     }
-    
+
     private fun generateRandomDuration(minMinutes: Int, maxMinutes: Int): Duration {
         val minutes = faker.number().numberBetween(minMinutes, maxMinutes).toLong()
         val seconds = faker.number().numberBetween(0, 60).toLong()

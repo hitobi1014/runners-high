@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @WebMvcTest(
     controllers = [TrainingScheduleController::class],
@@ -94,7 +95,7 @@ class TrainingScheduleControllerTest(
         val saveDto = TrainingInfoFixture.createSaveTrainingInfo(
             title = "템포런 훈련",
             location = "올림픽 공원",
-            scheduledDate = LocalDate.now().plusDays(3)
+            scheduledDateTime = LocalDateTime.now().plusDays(3)
         )
         val mockTrainingSchedule = TrainingInfoFixture.createTrainingSchedule()
 
@@ -120,7 +121,7 @@ class TrainingScheduleControllerTest(
     Given("유효하지 않은 훈련 일정 저장 요청이 들어왔을 때") {
         val invalidDto = mapOf(
             "title" to "",  // 제목이 비어있음
-            "scheduledDate" to "2024-01-01",  // 과거 날짜
+            "scheduledDateTime" to "2024-01-01T00:00:00",  // 과거 날짜
             "color" to "MINT",
             "groups" to emptyList<Any>()  // 그룹이 비어있음
         )

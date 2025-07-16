@@ -11,6 +11,7 @@ import io.runnershigh.backend.training.entity.TrainingStatus
 import net.datafaker.Faker
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.TextStyle
 import java.util.*
 
@@ -50,8 +51,12 @@ object TrainingScheduleFixture {
     fun createMockWeeklyTrainingSchedule(
         scheduleId: Long = faker.random().nextLong(1000),
         title: String = faker.lorem().characters(5, 15),
-        scheduledDate: LocalDate = LocalDate.now().plusDays(faker.random().nextLong(0, 7)),
-        dayOfWeek: String = scheduledDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREAN),
+        scheduledDateTime: LocalDateTime = LocalDateTime.now()
+            .plusDays(faker.random().nextLong(0, 7)),
+        dayOfWeek: String = scheduledDateTime.dayOfWeek.getDisplayName(
+            TextStyle.FULL,
+            Locale.KOREAN
+        ),
         distance: Double = faker.random().nextDouble(1.0, 50.0),
         status: TrainingStatus = TrainingStatus.entries.toTypedArray().random(),
     ) = WeeklyTrainingSchedule(
@@ -60,13 +65,13 @@ object TrainingScheduleFixture {
         dayOfWeek = dayOfWeek,
         distance = distance,
         status = status,
-        scheduledDate = scheduledDate
+        scheduledDateTime = scheduledDateTime
     )
 
     fun createMockTrainingScheduleForWeekly(
         id: Long = faker.random().nextLong(1000),
         title: String = faker.lorem().characters(5, 15),
-        scheduledDate: LocalDate = LocalDate.now(),
+        scheduledDateTime: LocalDateTime = LocalDateTime.now(),
         status: TrainingStatus = TrainingStatus.PLANNED,
     ): TrainingSchedules {
         val mockSchedule = mockk<TrainingSchedules>()
@@ -78,7 +83,7 @@ object TrainingScheduleFixture {
 
         every { mockSchedule.id } returns id
         every { mockSchedule.title } returns title
-        every { mockSchedule.scheduledDate } returns scheduledDate
+        every { mockSchedule.scheduledDateTime } returns scheduledDateTime
         every { mockSchedule.status } returns status
         every { mockSchedule.groups } returns mutableListOf(mockGroup)
 

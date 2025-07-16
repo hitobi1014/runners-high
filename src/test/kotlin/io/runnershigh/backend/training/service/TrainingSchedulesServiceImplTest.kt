@@ -22,6 +22,7 @@ import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @ExtendWith(MockKExtension::class)
@@ -67,7 +68,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         scheduleRepository.save(match { schedule ->
                             schedule.title == dto.title &&
                                     schedule.location == dto.location &&
-                                    schedule.scheduledDate == dto.scheduledDate &&
+                                    schedule.scheduledDateTime == dto.scheduledDateTime &&
                                     schedule.description == dto.description &&
                                     schedule.user == user &&
                                     schedule.groups.isNotEmpty()
@@ -251,8 +252,9 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
         }
 
         Given("1년 이후의 날짜로 훈련 일정 데이터를 만들고") {
-            val futureDate = LocalDate.now().plusDays(366)
-            val dto = TrainingInfoFixture.createSaveTrainingInfo().copy(scheduledDate = futureDate)
+            val futureDate = LocalDateTime.now().plusDays(366)
+            val dto =
+                TrainingInfoFixture.createSaveTrainingInfo().copy(scheduledDateTime = futureDate)
             val user = userEntity("test6")
 
             every { loginUserContext.getCurrentUser() } returns user
@@ -307,12 +309,12 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
 
         Given("다음 예정된 훈련 일정이 있는 상태에서") {
             val mockUser = userEntity("test8")
-            val futureDate = LocalDate.now().plusDays(3)
+            val futureDate = LocalDateTime.now().plusDays(3)
 
             val mockTrainingSchedule = TrainingInfoFixture.createEntityMockWithItems(
                 id = 1L,
                 title = "템포런 훈련",
-                scheduledDate = futureDate,
+                scheduledDateTime = futureDate,
                 user = mockUser
             )
 
@@ -325,7 +327,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 Then("다음 훈련 일정 정보를 반환한다") {
                     result?.scheduleId shouldBe 1L
                     result?.title shouldBe "템포런 훈련"
-                    result?.scheduledDate shouldBe futureDate
+                    result?.scheduledDateTime shouldBe futureDate
                     result?.totalDistance shouldBe 10.0
                     result?.totalTime shouldBe Duration.ofMinutes(50)
 
@@ -334,7 +336,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         scheduleRepository.retrieveNextUpcomingSchedule(mockUser)
                         mockTrainingSchedule.id
                         mockTrainingSchedule.title
-                        mockTrainingSchedule.scheduledDate
+                        mockTrainingSchedule.scheduledDateTime
                         mockTrainingSchedule.groups
                     }
 
@@ -490,12 +492,12 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                 val mockSchedule1 = TrainingScheduleFixture.createMockTrainingScheduleForWeekly(
                     id = 1L,
                     title = "즐겁게 월요런",
-                    scheduledDate = LocalDate.now().minusDays(3)
+                    scheduledDateTime = LocalDateTime.now().minusDays(3)
                 )
                 val mockSchedule2 = TrainingScheduleFixture.createMockTrainingScheduleForWeekly(
                     id = 2L,
                     title = "템포런 훈련",
-                    scheduledDate = LocalDate.now()
+                    scheduledDateTime = LocalDateTime.now()
                 )
 
                 every { loginUserContext.getCurrentUser() } returns mockUser
@@ -515,13 +517,14 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     result[0].run {
                         scheduleId shouldBe 1L
                         title shouldBe "즐겁게 월요런"
-                        scheduledDate shouldBe LocalDate.now().minusDays(3)
+                        scheduledDateTime.toLocalDate() shouldBe LocalDateTime.now().minusDays(3)
+                            .toLocalDate()
                     }
 
                     result[1].run {
                         scheduleId shouldBe 2L
                         title shouldBe "템포런 훈련"
-                        scheduledDate shouldBe LocalDate.now()
+                        scheduledDateTime.toLocalDate() shouldBe LocalDateTime.now().toLocalDate()
                     }
 
                     verify {

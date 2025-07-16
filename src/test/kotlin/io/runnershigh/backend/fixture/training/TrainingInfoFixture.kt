@@ -8,17 +8,11 @@ import io.runnershigh.backend.training.dto.request.SaveTrainingInfo
 import io.runnershigh.backend.training.dto.request.SaveTrainingItem
 import io.runnershigh.backend.training.dto.response.NextTrainingSchedule
 import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
-import io.runnershigh.backend.training.entity.TrainingPlanGroups
-import io.runnershigh.backend.training.entity.TrainingPlanItems
-import io.runnershigh.backend.training.entity.TrainingSchedules
-import io.runnershigh.backend.training.entity.DistanceUnit
-import io.runnershigh.backend.training.entity.TargetType
-import io.runnershigh.backend.training.entity.TrainingColor
-import io.runnershigh.backend.training.entity.TrainingStatus
+import io.runnershigh.backend.training.entity.*
 import io.runnershigh.backend.user.entity.UserEntity
 import net.datafaker.Faker
 import java.time.Duration
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 object TrainingInfoFixture {
@@ -31,7 +25,7 @@ object TrainingInfoFixture {
         title: String = faker.lorem().characters(5, 20),
         location: String = faker.location().publicSpace(),
         description: String = faker.lorem().sentence(30),
-        scheduledDate: LocalDate = LocalDate.now(),
+        scheduledDateTime: LocalDateTime = LocalDateTime.now(),
         status: TrainingStatus = TrainingStatus.PLANNED,
         color: TrainingColor = TrainingColor.entries.toTypedArray().random(),
     ): TrainingSchedules {
@@ -41,7 +35,7 @@ object TrainingInfoFixture {
             title = title,
             location = location,
             description = description,
-            scheduledDate = scheduledDate,
+            scheduledDateTime = scheduledDateTime,
             status = status,
             color = color
         )
@@ -50,15 +44,16 @@ object TrainingInfoFixture {
     fun createEntityMock(
         id: Long,
         user: UserEntity,
-        scheduledDate: LocalDate,
+        scheduledDateTime: LocalDateTime,
         status: TrainingStatus = TrainingStatus.PLANNED,
     ): TrainingSchedules {
-        val dto = createReadTrainingSchedule(id, scheduledDate = scheduledDate, status = status)
+        val dto =
+            createReadTrainingSchedule(id, scheduledDateTime = scheduledDateTime, status = status)
 
         return mockk<TrainingSchedules>().apply {
             every { this@apply.user } returns user
             every { this@apply.id } returns id
-            every { this@apply.scheduledDate } returns scheduledDate
+            every { this@apply.scheduledDateTime } returns scheduledDateTime
             every { this@apply.status } returns status
             every { this@apply.title } returns dto.title
             every { this@apply.location } returns dto.location
@@ -100,7 +95,7 @@ object TrainingInfoFixture {
     fun createEntityMockWithItems(
         id: Long,
         title: String = faker.lorem().characters(5, 15),
-        scheduledDate: LocalDate,
+        scheduledDateTime: LocalDateTime,
         user: UserEntity,
         status: TrainingStatus = TrainingStatus.PLANNED,
     ): TrainingSchedules {
@@ -109,7 +104,7 @@ object TrainingInfoFixture {
 
         every { mockSchedule.id } returns id
         every { mockSchedule.title } returns title
-        every { mockSchedule.scheduledDate } returns scheduledDate
+        every { mockSchedule.scheduledDateTime } returns scheduledDateTime
         every { mockSchedule.user } returns user
         every { mockSchedule.status } returns status
         every { mockSchedule.location } returns faker.location().publicSpace()
@@ -125,7 +120,7 @@ object TrainingInfoFixture {
             createEntityMock(
                 id = index.toLong(),
                 user = user,
-                scheduledDate = LocalDate.now().plusDays(index.toLong() - 1)
+                scheduledDateTime = LocalDateTime.now().plusDays(index.toLong() - 1)
             )
         }
     }
@@ -138,7 +133,7 @@ object TrainingInfoFixture {
     ): List<SaveTrainingInfo> {
         return (1..count).map {
             createSaveTrainingInfo(
-                scheduledDate = LocalDate.now().plusDays(it.toLong()),
+                scheduledDateTime = LocalDateTime.now().plusDays(it.toLong()),
                 groupCount = groupCount,
                 itemsPerGroup = itemsPerGroup
             )
@@ -149,7 +144,7 @@ object TrainingInfoFixture {
         title: String = faker.lorem().characters(5, 20),
         location: String = faker.location().publicSpace(),
         description: String = faker.lorem().sentence(30),
-        scheduledDate: LocalDate = LocalDate.now()
+        scheduledDateTime: LocalDateTime = LocalDateTime.now()
             .plusDays(faker.number().numberBetween(1, 30).toLong()),
         color: TrainingColor = TrainingColor.entries.toTypedArray().random(),
         groupCount: Int = faker.number().numberBetween(1, 3),
@@ -159,7 +154,7 @@ object TrainingInfoFixture {
             title = title,
             location = location,
             description = description,
-            scheduledDate = scheduledDate,
+            scheduledDateTime = scheduledDateTime,
             color = color,
             groups = createListSaveTrainingGroups(groupCount, itemsPerGroup)
         )
@@ -212,7 +207,7 @@ object TrainingInfoFixture {
         id: Long = 0,
         title: String = faker.lorem().characters(5, 15),
         location: String = faker.location().publicSpace(),
-        scheduledDate: LocalDate = LocalDate.now(),
+        scheduledDateTime: LocalDateTime = LocalDateTime.now(),
         description: String = faker.lorem().sentence(30),
         status: TrainingStatus = TrainingStatus.PLANNED,
         color: TrainingColor = TrainingColor.entries.toTypedArray().random(),
@@ -221,7 +216,7 @@ object TrainingInfoFixture {
             id = id,
             title = title,
             location = location,
-            scheduledDate = scheduledDate,
+            scheduledDateTime = scheduledDateTime,
             description = description,
             status = status,
             color = color
@@ -231,14 +226,14 @@ object TrainingInfoFixture {
     fun createNextTrainingSchedule(
         scheduleId: Long = faker.number().randomNumber(),
         title: String = faker.lorem().characters(5, 15),
-        scheduledDate: LocalDate = LocalDate.now()
+        scheduledDateTime: LocalDateTime = LocalDateTime.now()
             .plusDays(faker.number().numberBetween(1, 30).toLong()),
         totalDistance: Double = faker.number().randomDouble(1, 1, 20),
         totalTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
     ) = NextTrainingSchedule(
         scheduleId = scheduleId,
         title = title,
-        scheduledDate = scheduledDate,
+        scheduledDateTime = scheduledDateTime,
         totalDistance = totalDistance,
         totalTime = totalTime
     )

@@ -7,7 +7,7 @@ import io.runnershigh.backend.training.entity.TrainingStatus
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
 import java.time.Duration
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class SaveTrainingInfo(
     @field:NotBlank(message = "제목은 필수입니다.")
@@ -15,7 +15,7 @@ data class SaveTrainingInfo(
     val location: String = "",
     @field:NotNull(message = "훈련 예정일자는 필수입니다.")
     @field:FutureOrPresent(message = "훈련 예정일자는 오늘 또는 미래날짜여야합니다.")
-    val scheduledDate: LocalDate,
+    val scheduledDateTime: LocalDateTime,
     val description: String = "",
     val status: TrainingStatus = TrainingStatus.PLANNED,
     @field:NotNull(message = "색상은 필수입니다.")
