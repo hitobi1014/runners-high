@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.runnershigh.backend.training.dto.response.SummaryThisWeekSchedule
 import io.runnershigh.backend.training.dto.response.WeeklyTrainingSchedule
+import io.runnershigh.backend.training.entity.TrainingColor
 import io.runnershigh.backend.training.entity.TrainingPlanGroups
 import io.runnershigh.backend.training.entity.TrainingPlanItems
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.training.entity.TrainingStatus
 import net.datafaker.Faker
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.TextStyle
 import java.util.*
@@ -59,13 +59,15 @@ object TrainingScheduleFixture {
         ),
         distance: Double = faker.random().nextDouble(1.0, 50.0),
         status: TrainingStatus = TrainingStatus.entries.toTypedArray().random(),
+        trainingColor: TrainingColor = TrainingColor.entries.toTypedArray().random(),
     ) = WeeklyTrainingSchedule(
         scheduleId = scheduleId,
         title = title,
         dayOfWeek = dayOfWeek,
         distance = distance,
         status = status,
-        scheduledDateTime = scheduledDateTime
+        scheduledDateTime = scheduledDateTime,
+        trainingColor = trainingColor
     )
 
     fun createMockTrainingScheduleForWeekly(
@@ -73,6 +75,7 @@ object TrainingScheduleFixture {
         title: String = faker.lorem().characters(5, 15),
         scheduledDateTime: LocalDateTime = LocalDateTime.now(),
         status: TrainingStatus = TrainingStatus.PLANNED,
+        trainingColor: TrainingColor = TrainingColor.entries.toTypedArray().random(),
     ): TrainingSchedules {
         val mockSchedule = mockk<TrainingSchedules>()
         val mockGroup = mockk<TrainingPlanGroups>()
@@ -86,6 +89,7 @@ object TrainingScheduleFixture {
         every { mockSchedule.scheduledDateTime } returns scheduledDateTime
         every { mockSchedule.status } returns status
         every { mockSchedule.groups } returns mutableListOf(mockGroup)
+        every { mockSchedule.color } returns trainingColor
 
         return mockSchedule
     }

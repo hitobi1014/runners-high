@@ -36,5 +36,6 @@ fun TrainingSchedules.toWeeklyTrainingSchedule() = WeeklyTrainingSchedule(
     dayOfWeek = this.scheduledDateTime.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREAN),
     distance = this.groups.flatMap { it.items }.sumOf { it.estimatedDistance },
     status = this.status,
-    scheduledDateTime = this.scheduledDateTime
+    scheduledDateTime = this.scheduledDateTime,
+    trainingColor = this.color
 )
