@@ -338,6 +338,7 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                         mockTrainingSchedule.title
                         mockTrainingSchedule.scheduledDateTime
                         mockTrainingSchedule.groups
+                        mockTrainingSchedule.color
                     }
 
                     confirmVerified(loginUserContext, scheduleRepository, mockTrainingSchedule)

@@ -230,12 +230,14 @@ object TrainingInfoFixture {
             .plusDays(faker.number().numberBetween(1, 30).toLong()),
         totalDistance: Double = faker.number().randomDouble(1, 1, 20),
         totalTime: Duration = Duration.ofMinutes(faker.number().numberBetween(1, 10).toLong()),
+        trainingColor: TrainingColor = TrainingColor.entries.toTypedArray().random(),
     ) = NextTrainingSchedule(
         scheduleId = scheduleId,
         title = title,
         scheduledDateTime = scheduledDateTime,
         totalDistance = totalDistance,
-        totalTime = totalTime
+        totalTime = totalTime,
+        trainingColor = trainingColor
     )
 
     fun createSaveTrainingPlanItem(
