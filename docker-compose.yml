@@ -16,7 +16,20 @@ services:
       - .env
     networks:
       - backend
+  postgresql:
+    ports:
+    - '5432:5432'
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: runners_high_db
+    volumes:
+    - postgres:/var/lib/postgresql/data
+    networks:
+      - backend
 
 networks:
   backend:
     driver: bridge
+volumes:
+  postgres:
