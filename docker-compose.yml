@@ -1,7 +1,7 @@
 version: '3'
 services:
   app:
-    image: dalsam/runners-high_first
+    image: dalsam/runners-high_first:latest
     build:
       context: .
       dockerfile: Dockerfile
