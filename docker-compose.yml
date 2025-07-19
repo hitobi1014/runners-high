@@ -17,6 +17,7 @@ services:
     networks:
       - backend
   postgresql:
+    image: postgres:17
     ports:
     - '5432:5432'
     environment:
