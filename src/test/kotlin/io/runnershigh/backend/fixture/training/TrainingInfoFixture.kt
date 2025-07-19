@@ -235,8 +235,8 @@ object TrainingInfoFixture {
         scheduleId = scheduleId,
         title = title,
         scheduledDateTime = scheduledDateTime,
-        totalDistance = totalDistance,
-        totalTime = totalTime,
+        estimatedDistance = totalDistance,
+        estimatedTime = totalTime,
         trainingColor = trainingColor
     )
 

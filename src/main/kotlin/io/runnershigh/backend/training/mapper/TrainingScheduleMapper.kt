@@ -5,6 +5,7 @@ import io.runnershigh.backend.training.dto.response.ReadTrainingSchedule
 import io.runnershigh.backend.training.dto.response.WeeklyTrainingSchedule
 import io.runnershigh.backend.training.entity.TrainingSchedules
 import io.runnershigh.backend.user.entity.UserEntity
+import java.time.Duration
 import java.time.format.TextStyle
 import java.util.*
 
@@ -33,9 +34,13 @@ fun TrainingSchedules.toReadTrainingSchedule() = ReadTrainingSchedule(
 fun TrainingSchedules.toWeeklyTrainingSchedule() = WeeklyTrainingSchedule(
     scheduleId = this.id,
     title = this.title,
-    dayOfWeek = this.scheduledDateTime.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREAN),
-    distance = this.groups.flatMap { it.items }.sumOf { it.estimatedDistance },
-    status = this.status,
     scheduledDateTime = this.scheduledDateTime,
-    trainingColor = this.color
-)
+    dayOfWeek = this.scheduledDateTime.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREAN),
+    estimatedDistance = this.groups.flatMap { it.items }.sumOf { it.estimatedDistance },
+    estimatedTime = this.groups.flatMap { it.items }
+        .map { it.estimatedTime }
+        .fold(Duration.ZERO) { acc, dur -> acc.plus(dur) },
+    status = this.status,
+    trainingColor = this.color,
+
+    )

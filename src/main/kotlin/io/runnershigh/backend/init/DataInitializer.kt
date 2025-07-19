@@ -179,7 +179,7 @@ class DataInitializer(
     ): TrainingSchedules {
         return TrainingSchedules(
             user = user,
-            title = faker.lorem().characters(10, 100),
+            title = generateRandomScheduleTitle(),
             location = faker.address().streetAddress(),
             scheduledDateTime = faker.timeAndDate().between(startInstant, endInstant).atZone(zoneId)
                 .toLocalDateTime(),
@@ -195,7 +195,7 @@ class DataInitializer(
     ): TrainingSchedules {
         return TrainingSchedules(
             user = user,
-            title = faker.lorem().characters(10, 100),
+            title = generateRandomScheduleTitle(),
             location = faker.address().streetAddress(),
             scheduledDateTime = scheduleDate,
             color = TrainingColor.entries.toTypedArray().random(),

@@ -8,7 +8,7 @@ data class NextTrainingSchedule(
     val scheduleId: Long,
     val title: String,
     val scheduledDateTime: LocalDateTime,
-    val totalDistance: Double,
-    val totalTime: Duration,
+    val estimatedDistance: Double,
+    val estimatedTime: Duration,
     val trainingColor: TrainingColor,
 )

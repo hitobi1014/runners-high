@@ -21,7 +21,6 @@ import io.runnershigh.backend.user.entity.UserEntity
 import io.runnershigh.backend.user.util.LoginUserContext
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -328,8 +327,8 @@ class TrainingSchedulesServiceImplTest : BehaviorSpec() {
                     result?.scheduleId shouldBe 1L
                     result?.title shouldBe "템포런 훈련"
                     result?.scheduledDateTime shouldBe futureDate
-                    result?.totalDistance shouldBe 10.0
-                    result?.totalTime shouldBe Duration.ofMinutes(50)
+                    result?.estimatedDistance shouldBe 10.0
+                    result?.estimatedTime shouldBe Duration.ofMinutes(50)
 
                     verify {
                         loginUserContext.getCurrentUser()

@@ -117,8 +117,8 @@ class TrainingSchedulesServiceImpl(
             scheduleId = trainingSchedule.id,
             title = trainingSchedule.title,
             scheduledDateTime = trainingSchedule.scheduledDateTime,
-            totalDistance = totalDistance,
-            totalTime = totalTime,
+            estimatedDistance = totalDistance,
+            estimatedTime = totalTime,
             trainingColor = trainingSchedule.color
         )
     }

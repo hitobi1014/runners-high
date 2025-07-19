@@ -22,8 +22,7 @@ object TrainingScheduleFixture {
     fun createMockSummaryThisWeekSchedule(
         scheduleCount: Int = faker.random().nextInt(1, 10),
         totalDistance: Double = faker.random().nextDouble(1.0, 100.0),
-        totalTime: Duration = Duration.ofHours(faker.random().nextLong(1, 10))
-            .plusMinutes(faker.random().nextLong(1, 60)),
+        totalTime: Duration = createDurationHourAndMinute(),
     ) = SummaryThisWeekSchedule(
         scheduleCount = scheduleCount,
         totalDistance = totalDistance,
@@ -32,8 +31,7 @@ object TrainingScheduleFixture {
 
     fun createMockTrainingSchedule(
         estimatedDistance: Double = faker.random().nextDouble(1.0, 100.0),
-        estimatedTime: Duration = Duration.ofHours(faker.random().nextLong(1, 10))
-            .plusMinutes(faker.random().nextLong(1, 60)),
+        estimatedTime: Duration = createDurationHourAndMinute(),
     ): TrainingSchedules {
         val mockItem = mockk<TrainingPlanItems>()
         every { mockItem.estimatedDistance } returns estimatedDistance
@@ -48,6 +46,10 @@ object TrainingScheduleFixture {
         return mockSchedule
     }
 
+    private fun createDurationHourAndMinute(): Duration =
+        Duration.ofHours(faker.random().nextLong(1, 10))
+            .plusMinutes(faker.random().nextLong(1, 60))
+
     fun createMockWeeklyTrainingSchedule(
         scheduleId: Long = faker.random().nextLong(1000),
         title: String = faker.lorem().characters(5, 15),
@@ -57,17 +59,19 @@ object TrainingScheduleFixture {
             TextStyle.FULL,
             Locale.KOREAN
         ),
-        distance: Double = faker.random().nextDouble(1.0, 50.0),
+        estimatedDistance: Double = faker.random().nextDouble(1.0, 50.0),
+        estimatedTime: Duration = createDurationHourAndMinute(),
         status: TrainingStatus = TrainingStatus.entries.toTypedArray().random(),
         trainingColor: TrainingColor = TrainingColor.entries.toTypedArray().random(),
     ) = WeeklyTrainingSchedule(
         scheduleId = scheduleId,
         title = title,
         dayOfWeek = dayOfWeek,
-        distance = distance,
+        estimatedDistance = estimatedDistance,
+        estimatedTime = estimatedTime,
         status = status,
         scheduledDateTime = scheduledDateTime,
-        trainingColor = trainingColor
+        trainingColor = trainingColor,
     )
 
     fun createMockTrainingScheduleForWeekly(
@@ -82,6 +86,7 @@ object TrainingScheduleFixture {
         val mockItem = mockk<TrainingPlanItems>()
 
         every { mockItem.estimatedDistance } returns faker.random().nextDouble(1.0, 50.0)
+        every { mockItem.estimatedTime } returns createDurationHourAndMinute()
         every { mockGroup.items } returns mutableListOf(mockItem)
 
         every { mockSchedule.id } returns id
