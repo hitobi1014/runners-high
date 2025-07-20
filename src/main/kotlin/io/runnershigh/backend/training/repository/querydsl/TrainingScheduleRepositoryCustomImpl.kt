@@ -8,6 +8,7 @@ import io.runnershigh.backend.training.entity.TrainingStatus
 import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Repository
 class TrainingScheduleRepositoryCustomImpl(
@@ -17,44 +18,41 @@ class TrainingScheduleRepositoryCustomImpl(
     override fun retrieveTrainingSchedules(user: UserEntity): List<TrainingSchedules> {
         return queryFactory.selectFrom(trainingSchedules)
             .where(eqUser(user))
-            .orderBy(trainingSchedules.scheduledDate.desc())
+            .orderBy(trainingSchedules.scheduledDateTime.desc())
             .fetch()
     }
-    
+
     override fun retrieveNextUpcomingSchedule(user: UserEntity): TrainingSchedules? {
         return queryFactory.selectFrom(trainingSchedules)
             .where(
                 eqUser(user),
-                trainingSchedules.scheduledDate.goe(LocalDate.now()),
+                trainingSchedules.scheduledDateTime.goe(LocalDateTime.now()),
             )
-            .orderBy(trainingSchedules.scheduledDate.asc())
+            .orderBy(trainingSchedules.scheduledDateTime.asc())
             .fetchFirst()
     }
 
     override fun findThisWeekTrainingSchedules(
         user: UserEntity,
-        startDate: LocalDate,
-        endDate: LocalDate,
+        startDateTime: LocalDateTime,
+        endDateTime: LocalDateTime,
         plannedOnly: Boolean,
     ): List<TrainingSchedules> {
         return queryFactory.selectFrom(trainingSchedules)
             .where(
                 eqUser(user),
-                betweenScheduleDate(startDate, endDate),
+                betweenScheduleDate(startDateTime, endDateTime),
                 if (plannedOnly) eqPlanStatus() else null
             )
-            .orderBy(trainingSchedules.scheduledDate.desc())
+            .orderBy(trainingSchedules.scheduledDateTime.desc())
             .fetch()
     }
 
-    private fun betweenScheduleDate(startDate: LocalDate, endDate: LocalDate): BooleanExpression? =
-        trainingSchedules.scheduledDate.between(startDate, endDate)
-
-    private fun betweenSundayAndSaturday(
-        beforeSunday: LocalDate,
-        afterSaturday: LocalDate,
+    private fun betweenScheduleDate(
+        startDateTime: LocalDateTime,
+        endDateTime: LocalDateTime,
     ): BooleanExpression? =
-        trainingSchedules.scheduledDate.between(beforeSunday, afterSaturday)
+        trainingSchedules.scheduledDateTime.between(startDateTime, endDateTime)
 
     private fun eqUser(user: UserEntity): BooleanExpression? =
         trainingSchedules.user.eq(user)

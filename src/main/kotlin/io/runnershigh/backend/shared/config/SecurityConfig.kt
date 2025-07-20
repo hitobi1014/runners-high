@@ -4,6 +4,7 @@ import io.runnershigh.backend.shared.security.JwtAuthenticationFilter
 import io.runnershigh.backend.shared.security.jwt.JwtTokenProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -23,11 +24,12 @@ class SecurityConfig(
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf().disable()
-            .httpBasic().disable()
+        http.csrf { it.disable() }
+            .httpBasic { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // 인증 없이 접근 가능 (추가 or 변경시 코드 수정)
                     .requestMatchers("/api/auth/**").permitAll()
                     .anyRequest().authenticated()

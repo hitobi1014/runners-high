@@ -4,7 +4,7 @@ import io.runnershigh.backend.shared.entity.BaseEntity
 import io.runnershigh.backend.user.entity.UserEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.Comment
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "training_schedules")
@@ -24,9 +24,8 @@ class TrainingSchedules(
     @Comment("장소")
     var location: String,
 
-    @Comment("훈련예정 일자")
-    @Temporal(TemporalType.DATE)
-    var scheduledDate: LocalDate,
+    @Comment("훈련일시")
+    var scheduledDateTime: LocalDateTime,
 
     @Comment("훈련 설명")
     @Lob

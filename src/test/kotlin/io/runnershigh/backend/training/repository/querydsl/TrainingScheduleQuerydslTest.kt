@@ -11,6 +11,7 @@ import io.runnershigh.backend.user.entity.UserEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @QuerydslTest
 class TrainingScheduleQuerydslTest : BehaviorSpec() {
@@ -26,7 +27,7 @@ class TrainingScheduleQuerydslTest : BehaviorSpec() {
         testEntityManager.persist(user)
 
         val trainingSchedules = TrainingInfoFixture.createTrainingSchedule(
-            scheduledDate = LocalDate.now().plusDays(1),
+            scheduledDateTime = LocalDateTime.now().plusDays(1),
             title = "보라매런",
             user = user
         )
